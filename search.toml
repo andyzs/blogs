@@ -1,6 +1,6 @@
 [input]
 html_selector = "main"
-base_directory = "/homestore1/smbshare/Andi/blog-ydnaz/output"
+base_directory = "output"
 
 [[input.files]]
 path = "Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html"
@@ -13,9 +13,9 @@ url = "/Volume Storage management di Windows.html"
 title = "Microsoft Storage Space"
 
 [[input.files]]
-path = "membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html"
-url = "/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html"
-title = "Membangun Cluster di Mariadb menggunakan Galera Cluster part 1"
+path = "membangun-mariadb-cluster-menggunakan-galera-cluster-part-1.html"
+url = "/membangun-mariadb-cluster-menggunakan-galera-cluster-part-1.html"
+title = "Membangun Mariadb Cluster menggunakan Galera Cluster part 1"
 
 [[input.files]]
 path = "Bhyve the BSD Hypervisor.html"
