@@ -1,0 +1,23 @@
+[input]
+html_selector = "main"
+base_directory = "output"
+
+[[input.files]]
+path = "Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html"
+url = "/Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html"
+title = "OpenTofu"
+
+[[input.files]]
+path = "Volume Storage management di Windows.html"
+url = "/Volume Storage management di Windows.html"
+title = "Microsoft Storage Space"
+
+[[input.files]]
+path = "Bhyve the BSD Hypervisor.html"
+url = "/Bhyve the BSD Hypervisor.html"
+title = "Berkenalan dengan Bhyve The BSD Hypervisor"
+
+[[input.files]]
+path = "install-openvpn-di-debian-linux-server.html"
+url = "/install-openvpn-di-debian-linux-server.html"
+title = "Install dan setting Openvpn di Debian Jessie"

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Pelican" />
+    <meta name="description" content="blog-ydnaz Blog Posts">
+    <title>Install dan setting Openvpn di Debian Jessie</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
+    <link rel="stylesheet" type="text/css" href="https://blog.ydnaz.id/theme/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://blog.ydnaz.id/theme/css/pygment.css" />
+    <link rel="shortcut icon" href="https://blog.ydnaz.id/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://blog.ydnaz.id/theme/css/stork.css">
+    <link rel="stylesheet" media="screen and (prefers-color-scheme: dark)"
+        href="https://blog.ydnaz.id/theme/css/stork-dark.css">
+    <link
+        href="https://blog.ydnaz.id/feeds/all.atom.xml"
+        type="application/atom+xml" rel="alternate" title="blog-ydnaz Atom Feed" />
+<meta name="description" content="Cara menginstall openvpn di debian linux" />
+</head>
+
+<body class="min-h-screen flex flex-col max-w-7xl lg:max-w-none text-zinc-800 bg-neutral-100 
+    dark:bg-neutral-900 dark:text-zinc-300 container mx-auto justify-center md:px-3 ">
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+    <nav class="sm:flex sm:justify-between xl:ml-32 pl-4 items-center">
+        <div class="flex pt-4">
+            <h1 class="font-semibold text-2xl"><a href="https://blog.ydnaz.id/">blog-ydnaz</a></h1>
+            <button id="theme-toggle" type="button" aria-label="Light|Dark"
+                class="text-zinc-700 dark:text-zinc-400 rounded-full focus:outline-none text-sm ml-2 p-1">
+                <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                        fill-rule="evenodd" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <ul class="flex flex-wrap lg:mr-24 md:pt-0">
+            <li class="mr-4 pt-6"><a  href="https://blog.ydnaz.id/archives.html">Archive</a></li>
+            <li class="mr-4 pt-6"><a                     href="https://blog.ydnaz.id/categories.html">Categories</a></li>
+            <li class="mr-4 pt-6"><a  href="https://blog.ydnaz.id/tags.html">Tags</a></li>
+            <li class="mr-4 pt-6"><a  href="https://blog.ydnaz.id/search.html">Search</a></li>
+        </ul>
+    </nav>
+    <div class="flex-grow md:max-w-screen-md md:mx-auto md:w-3/4 px-4">
+        <nav class="text-zinc-800 dark:text-zinc-300 mt-12 pb-2 md:mt-16" aria-label="Breadcrumb">
+            <ul class="p-0 inline-flex items-center">
+                <li class="flex items-center">
+                    <a href="https://blog.ydnaz.id/" class="text-zinc-800 dark:text-zinc-300 inline-flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
+                            </path>
+                        </svg>
+                        Home
+                    </a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+                <li class="flex items-center">
+                    <a href="https://blog.ydnaz.id/categories.html">Categories</a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+                <li class="flex items-center">
+                    <a href="https://blog.ydnaz.id/category/linux.html">Linux</a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+            </ul>
+        </nav>
+
+<main>
+  <header>
+    <h1 class="font-semibold text-3xl my-2">Install dan setting Openvpn di Debian Jessie</h1>
+    <footer class="flex text-sm text-zinc-800 dark:text-zinc-400">
+      <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
+        <time>April 12, 2015</time>
+        <div>
+          <span>&nbsp;·&nbsp;{'minutes': 9} min read</span>
+        </div>
+        <div>
+          <span>&nbsp;·&nbsp;me</span>
+        </div>
+      </div>
+    </footer>
+    <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
+      <span>Last updated: April 16, 2017</span>
+    </div>
+  </header>
+  <div class="max-w-7xl container mx-auto my-8 text-zinc-800 dark:text-zinc-300  
+              prose lg:max-w-none prose-headings:text-zinc-800 prose-headings:dark:text-zinc-300 
+              prose-h1:text-3xl lg:prose-h1:text-3xl prose-headings:font-semibold 
+              prose-pre:bg-zinc-200 prose-pre:text-zinc-800
+              dark:prose-pre:bg-zinc-800 dark:prose-pre:text-zinc-200
+              prose-blockquote:text-zinc-800
+              dark:prose-blockquote:text-zinc-200
+              prose-a:text-slate-600 prose-a:font-normal
+              dark:prose-a:text-slate-400
+              dark:prose-strong:text-zinc-200 
+              dark:prose-code:text-zinc-200
+              dark:prose-code:bg-zinc-800
+              prose-code:bg-zinc-200
+              prose-code:font-light
+              prose-img:rounded-md
+              sm:text-left md:text-justify
+              ">
+    <p><em>VPN</em> atau <code>virtual private network</code> protokol jaringan untuk membuat tunnel jaringan diantara komputer yang bukan berada di satu jaringan lokal untuk dapat berkomunikasi secara aman. </p>
+<p>Pada artikel kali ini saya akan menulis <em>how-to</em> / tutorial menginstall dan menyetting OpenVPN server di Debian Jessie. </p>
+<h5>Install</h5>
+<p>Seperti biasa sebelum menginstall packet baru di server sebaiknya kita mengupdate system kita terlebih dahulu.</p>
+<div class="highlight"><pre><span></span><span class="x">sudo apt get update &amp;&amp; sudo apt get upgrade</span>
+</pre></div>
+<p>lalu install paket-paket yang dibutuhkan oleh openvpn</p>
+<div class="highlight"><pre><span></span><span class="x">sudo apt install openvpn easy-rsa</span>
+</pre></div>
+<p>Dengan demikian <code>OpenVPN</code> sudah terinstall, selanjutnya kita akan mengkonfigurasinya.</p>
+<h5>Setting OpenVPN  serta Buat Sertifikat dan key</h5>
+<p>Direktori tempat <code>OpenVPN</code> menyimpan file konfigurasinya secara <em>default</em> ada <code>/etc/openvpn/</code> kita akan meletakan semua file yang dibutuhkan untuk mengkonfigurasi server di direktori tersebut.
+<code>OpenVPN</code> server menyertakan contoh file konfigurasinya untuk mempermudah pengguna melakukan konfigurasi, meskipun kita bisa membuat sendiri file konfigurasi ini.</p>
+<p>Untuk mengcopy file <em>sample</em> ini dan meletakannya di direktori <code>/etc/openvpn</code> kita bisa melakukan dengan perintah berikut:</p>
+<div class="highlight"><pre><span></span><span class="x">sudo gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz &gt; /etc/openvpn/server.conf</span>
+</pre></div>
+<p>Selanjutnya kita akan menyetting dan menyesuaikan file konfigurasi <code>server.conf</code> ini.</p>
+<p>Beberapa perubahan utama yang akan kita buat pada file konfig adalah:</p>
+<ul>
+<li>Meningkatkan level enkripsi </li>
+<li>Meneruskan <em>web traffic</em> ke alamat tujuan</li>
+<li>Mencegah bocornya DNS <em>request</em> keluar dari koneksi VPN </li>
+<li>Menyetting <em>permission</em> dan memperkuatnya</li>
+</ul>
+<p>tapi kita menyesuaikan settingan file konfig di <code>server.conf</code> kita akan terlebih dahulu membuat sertifikat dan key, yang akan digunakan sebagai autentikasi untuk <code>OpenVPN</code> server kita.
+Pertama kita akan meng<em>copy</em> <code>Easy-rsa</code> <em>generation script</em></p>
+<div class="highlight"><pre><span></span><span class="x">sudo cp -r /usr/share/easy-rsa/ /etc/openvpn</span>
+</pre></div>
+<p>Selanjutnya buat direktori tempat kita menyimpan key dan sertifikat <code>OpenVPN</code> kita.</p>
+<div class="highlight"><pre><span></span><span class="x">sudo mkdir /etc/openvpn/easy-rsa/keys</span>
+</pre></div>
+<p>kemudian buat <em>symbolic links</em> dari <code>openssl-1.0.0.cnf</code> ke <code>openssl.cnf</code>:</p>
+<div class="highlight"><pre><span></span><span class="x">sudo ln -s openssl-1.0.0.cnf openssl.cnf</span>
+</pre></div>
+<p>Setelah itu kita akan menyetting parameter untuk <em>certificate</em> kita sebelum sertifikat itu di buat.</p>
+<div class="highlight"><pre><span></span><span class="x">sudo nano /etc/openvpn/easy-rsa/vars</span>
+</pre></div>
+<p>Pada file ini variable berikut adalah yg perlu diganti dan dibuat sesuai informasi kita inginkan:</p>
+<div class="highlight"><pre><span></span><span class="x">export KEY_COUNTRY="US" </span>
+<span class="x">export KEY_PROVINCE="TX" </span>
+<span class="x">export KEY_CITY="Dallas" </span>
+<span class="x">export KEY_ORG="My Company Name" </span>
+<span class="x">export KEY_EMAIL="sammy@example.com" </span>
+<span class="x">export KEY_OU="MYOrganizationalUnit" </span>
+</pre></div>
+<p>sedang variable lain, tidak perlu diganti kecuali memang paham apa yang akan dilakukan.</p>
+<p>Selanjutnya kita akan pindah ke direktori <code>/etc/openvpn</code> untuk meng<em>generate</em> <em>Diffie-Helman</em> parameter menggunakan <em>tool</em> bawaan dari OPENSSL bernama <code>dhparam</code> </p>
+<div class="highlight"><pre><span></span><span class="x">cd /etc/openvpn</span>
+<span class="x">sudo openssl dhparam -out /etc/openvpn/easy-rsa/keys/dh4096.pem 4096</span>
+</pre></div>
+<p>opsi -out diatas mendefinisikan lokasi output hasil <em>generate</em> dari dhparam.</p>
+<p>Dengan demikian <em>dhparam</em>  kita telah berhasil dibuat, selanjutnya kita akan meng<em>generate</em> <em>certificate</em> server  dan server <em>key</em>.</p>
+<p>Untuk menggenerate server <em>key</em> dan server <em>certificate</em> kita akan pindah satu direktori ke direktory <em>easy-rsa</em> dan meng<em>generate</em> pki (Public Key Infrastructure) dari file <code>vars</code> yang telah kita setting variablenya sebelumnya</p>
+<div class="highlight"><pre><span></span><span class="x">cd easy-rsa</span>
+<span class="x">sudo . ./vars</span>
+</pre></div>
+<p><sup>perhatikan tanda spasi (white space) diantara titik, saat meng<em>generate</em> pki diatas. </sup></p>
+<p>Saat menjalankan perintah diatas kita akan mendapatkan notif :</p>
+<div class="highlight"><pre><span></span><span class="n">NOTE</span><span class="o">:</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">./</span><span class="n">clean</span><span class="o">-</span><span class="n">all</span><span class="o">,</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">doing</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">rf</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="sr">/etc/openvpn/easy-rsa/</span><span class="n">keys</span>
+</pre></div>
+<p>Selanjutnya jalankan clean-all untuk mencegah <em>key</em> lain yang mungkin konflik dengan <em>key</em> server kita nanti, dan membuat ca <em>certificate</em></p>
+<div class="highlight"><pre><span></span>sudo ./clean-all
+sudo ./build-ca
+</pre></div>
+<p>Perintah <code>./build-ca</code> diatas akan memanggil open-ssl interaktif dan memberikan beberapa <em>challange question</em> seperti berikut:</p>
+<div class="highlight"><pre><span></span><span class="x">Generating a 1024 bit RSA private key</span>
+<span class="x">............++++++</span>
+<span class="x">...........++++++</span>
+<span class="x">writing new private key to 'ca.key'</span>
+<span class="x">-----</span>
+<span class="x">You are about to be asked to enter information that will be incorporated</span>
+<span class="x">into your certificate request.</span>
+<span class="x">What you are about to enter is what is called a Distinguished Name or a DN.</span>
+<span class="x">There are quite a few fields but you can leave some blank</span>
+<span class="x">For some fields there will be a default value,</span>
+<span class="x">If you enter '.', the field will be left blank.</span>
+<span class="x">-----</span>
+<span class="x">Country Name (2 letter code) [KG]:</span>
+<span class="x">State or Province Name (full name) [NA]:</span>
+<span class="x">Locality Name (eg, city) [BISHKEK]:</span>
+<span class="x">Organization Name (eg, company) [OpenVPN-TEST]:</span>
+<span class="x">Organizational Unit Name (eg, section) []:</span>
+<span class="x">Common Name (eg, your name or your server's hostname) []:OpenVPN-CA</span>
+<span class="x">Email Address [me@myhost.mydomain]:</span>
+</pre></div>
+<p>Dengan demikian kita sudah memiliki <em>certificate</em> ca master kita, selanjutnya kita akan membuat  <em>key</em> server dan <em>certificate</em> server untuk openvpn server dengan perintah berikut:</p>
+<div class="highlight"><pre><span></span><span class="x">sudo ./build-key-server server</span>
+</pre></div>
+<p>kita akan kembali mendapatkan <em>challenge question</em> interaktif dengan tambahan extra 2 pertanyaan seperti ini:</p>
+<div class="highlight"><pre><span></span>Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+
+Sign the certificate? [y/n]
+1 out of 1 certificate requests certified, commit? [y/n]
+</pre></div>
+<p><sup>seluruh pertanyaan challenge question sebaiknya dibiarkan bernilai default saja dengan menekan <code>enter</code>, karna kita sudah menyetting nilai variabelnya di file <code>vars</code>. Untuk extra pada saat membuat server <em>key</em> dan server <em>certificate</em> biarkan bernilai kosong.</sup></p>
+<p>Setelah itu, selanjutnya kita akan mengcopy semua file kedalam directory <em>keys</em> yang sudah kita buat sebelumnya  dan merubah permission dari direktori tersebut supaya lebih aman.</p>
+<div class="highlight"><pre><span></span><span class="x">sudo cp /etc/openvpn/easy-rsa/keys/{server.crt,server.key,ca.crt} /etc/openvpn</span>
+<span class="x">sudo chmod 400 /etc/openvpn/easy-rsa/keys</span>
+</pre></div>
+<p>Selanjutnya kita akan kembali ke directory <code>openvpn</code> untuk melanjutkan mengubah settingan dari file config.</p>
+<div class="highlight"><pre><span></span><span class="x">cd /etc/openvpn</span>
+<span class="x">sudo nano server.conf</span>
+</pre></div>
+<p>beberapa hal yang akan kita ubah:</p>
+<ul>
+<li>mendefinisikan lokasi sertifikat master ca, dan server <em>certificate</em> and server <em>key</em> berada</li>
+</ul>
+<div class="highlight"><pre><span></span># Any X509 key management system can be used.
+# OpenVPN can also use a PKCS #12 formatted key file
+# (see "pkcs12" directive in man page).
+ca /etc/openvpn/keys/ca.crt
+cert /etc/openvpn/keys/openvpn-server.crt
+key /etc/openvpn/keys/openvpn-server.key 
+</pre></div>
+<ul>
+<li>mengubah dhparam dari default 1024 ke 4096, sesuai dengan nilai key <code>dhparam</code> yang kita buat sebelumnya.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x"># Diffie hellman parameters.</span>
+<span class="x"># Generate your own with:</span>
+<span class="x">#   openssl dhparam -out dh1024.pem 1024</span>
+<span class="x"># Substitute 2048 for 1024 if you are using</span>
+<span class="x"># 2048 bit keys.</span>
+<span class="x">dh dh4096.pem</span>
+</pre></div>
+<ul>
+<li>ijinkan opsi push "redirect-gateway" dengan menghapus <em>comment(;)</em> nya.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x">;push "redirect-gateway def1 bypass-dhcp"</span>
+</pre></div>
+<ul>
+<li>hapus <em>comment</em> dari opsi <code>push "dhcp-option"</code> dan gantilah alamt DNS dengan alamat DNS yang kita ingin gunakan.
+Kita bisa menggunakan opsi DNS dari <a href="https://www.lifewire.com/free-and-public-dns-servers-2626062">daftar public DNS ini</a></li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x"># Certain Windows-specific network settings</span>
+<span class="x"># can be pushed to clients, such as DNS</span>
+<span class="x"># or WINS server addresses.  CAVEAT:</span>
+<span class="x"># http://openvpn.net/faq.html#dhcpcaveats</span>
+<span class="x"># The addresses below refer to the public</span>
+<span class="x"># DNS servers provided by opendns.com.</span>
+<span class="x">;push "dhcp-option DNS 208.67.222.222"</span>
+<span class="x">;push "dhcp-option DNS 208.67.220.220"</span>
+</pre></div>
+<p>Selanjutnya kita akan membuat user tanpa login shell dan <em>privileges root</em> dan menyetting <code>user</code> dan <code>group</code>, karna secara <em>default</em> <code>openvpn</code> berjalan dengan akun <em>root</em> atau superuser, maka untuk meningkatkan keamanan kita akan merubah ini, agar setelah berjalan di <em>background</em> openvpn server menurukan <em>privileges</em>nya menjadi user yang baru kita buat.</p>
+<div class="highlight"><pre><span></span><span class="x">sudo adduser --system --shell /usr/sbin/nologin --no-create-home openvpn</span>
+</pre></div>
+<p>kemudian cari baris berikut, hapus <em>comment</em>nya dan ganti <em>user</em>nya.</p>
+<div class="highlight"><pre><span></span><span class="x"># You can uncomment this out on</span>
+<span class="x"># non-Windows systems.</span>
+<span class="x">;user nobody</span>
+<span class="x">;group nogroup</span>
+</pre></div>
+<p>menjadi seperti ini </p>
+<div class="highlight"><pre><span></span><span class="x"># You can uncomment this out on</span>
+<span class="x"># non-Windows systems.</span>
+<span class="x">user openvpn</span>
+<span class="x">group nogroup</span>
+</pre></div>
+<p>Opsi lain yang bisa ditambahkan atau di ubah untuk memperkuat openvpn server kita seperti
+* merubah <em>chipper</em> dari 128 menjadi 256</p>
+<div class="highlight"><pre><span></span><span class="x">echo 'cipher AES-256-CBC' &gt;&gt; /etc/openvpn/server.conf</span>
+</pre></div>
+<ul>
+<li>merubah auth dari default SHA-1 dengan SHA-2 512</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x">echo 'auth SHA512' &gt;&gt; /etc/openvpn/server.conf</span>
+</pre></div>
+<ul>
+<li>meningkatkan VPN kontrol channel dengan <em>chipper suite</em> yang lebih kuat sesuai refrensi <a href="https://community.openvpn.net/openvpn/wiki/Hardening#Useof--tls-cipher">disini</a></li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x">echo 'tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-128-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-128-CBC-SHA' &gt;&gt; /etc/openvpn/server.conf        </span>
+</pre></div>
+<ul>
+<li>menggunakan opsi --tls-auth
+Untuk menggunakan opsi ini, kita harus meng<em>generate</em>nya terlebih dahulu</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x">sudo openvpn --genkey --secret easy-rsa/keys/ta.key</span>
+</pre></div>
+<p>Kemudian ubah opsi tls-auth di config menjadi seperti ini</p>
+<div class="highlight"><pre><span></span><span class="x"># The server and each client must have</span>
+<span class="x"># a copy of this key.</span>
+<span class="x"># The second parameter should be '0'</span>
+<span class="x"># on the server and '1' on the clients.</span>
+<span class="x">tls-auth /etc/openvpn/easy-rsa/keys/ta.key 0 # This file is secret</span>
+</pre></div>
+<p>Selanjutnya kita akan mengkonfigurasi firewall dan enable <em>packet forwarding</em>
+* enable <em>packet forwarding</em> untuk mengijinkan opsi ini maka kita akan merubah baris di <code>/etc/sysctl.conf</code>
+dari </p>
+<div class="highlight"><pre><span></span><span class="x"># Uncomment the next line to enable packet forwarding for IPv4</span>
+<span class="x">#net.ipv4.ip_forward=1</span>
+</pre></div>
+<p>menjadi seperti ini</p>
+<div class="highlight"><pre><span></span><span class="x"># Uncomment the next line to enable packet forwarding for IPv4</span>
+<span class="x">net.ipv4.ip_forward=1</span>
+</pre></div>
+<ul>
+<li>Install dan Setting <code>ufw</code>. UFW adalah front-end untuk mempermudah manajemen dan administrasi dari linux IPTables.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="x">sudo apt install ufw</span>
+</pre></div>
+<p>kemudian ubah default <em>policy</em>
+dari seperti ini</p>
+<div class="highlight"><pre><span></span>DEFAULT_FORWARD_POLICY="DROP"
+</pre></div>
+<p>menjadi </p>
+<div class="highlight"><pre><span></span><span class="x">DEFAULT_FORWARD_POLICY="ACCEPT"</span>
+</pre></div>
+<p>Selanjutnya kita akan menambahkan rules baru untuk <code>openvpn</code> pada UFW.</p>
+<div class="highlight"><pre><span></span>nano /etc/ufw/before.rules
+</pre></div>
+<p>kemudian tambahkan baris berikut sebelum baris terahir <code>Don't delete</code>:</p>
+<div class="highlight"><pre><span></span><span class="x"># START OPENVPN RULES</span>
+<span class="x"># NAT table rules</span>
+<span class="x">*nat</span>
+<span class="x">:POSTROUTING ACCEPT [0:0]</span>
+<span class="x"># Allow traffic from OpenVPN client to eth0</span>
+<span class="x">-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE</span>
+<span class="x">COMMIT</span>
+<span class="x"># END OPENVPN RULES</span>
+</pre></div>
+<p>Selanjutnya kita akan mengijinkan koneksi service seperti ssh, web server serta openvpn ke ufw dan menjalankan ufw <em>service</em></p>
+<div class="highlight"><pre><span></span><span class="x">sudo ufw allow ssh</span>
+<span class="x">sudo ufw allow http</span>
+<span class="x">sudo ufw allow https</span>
+<span class="x">sudo ufw allow 1194/udp</span>
+<span class="x">sudo ufw enable</span>
+</pre></div>
+<p>jika kita ingin mengecek status ufw bisa dilakukan dengan perintah:</p>
+<div class="highlight"><pre><span></span><span class="x">sudo ufw status</span>
+</pre></div>
+<p>Selanjutnya <em>save</em> dan <em>restart service</em> openvpn server</p>
+<div class="highlight"><pre><span></span><span class="x">systemctl restart openvpn</span>
+</pre></div>
+<p>Hingga disini openvpn server sudah dapat digunakan, selanjutnya kita akan meng<em>generate</em> dan setting <em>certificate</em> untuk client agar dapat terhubung dengan openvpn.</p>
+<p>Untuk setting dan generate client maka buat terlebih dahulu direktory tempat menyimpan client config dan copy base config example bawaan dari openvpn</p>
+<div class="highlight"><pre><span></span><span class="x">mkdir -p /etc/openvpn/clients/files</span>
+<span class="x">cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/clients/base.conf</span>
+<span class="x">````</span>
+<span class="x">Kemudian edit file base.conf</span>
+
+<span class="x">```php</span>
+<span class="x"># The hostname/IP and port of the server.</span>
+<span class="x"># You can have multiple remote entries</span>
+<span class="x"># to load balance between the servers.</span>
+<span class="x">remote your_server_ip 1194</span>
+<span class="x">proto udp</span>
+<span class="x"># Downgrade privileges after initialization (non-Windows only)</span>
+<span class="x">user nobody</span>
+<span class="x">group nogroup</span>
+<span class="x">ca ca.crt</span>
+<span class="x">cert client.crt</span>
+<span class="x">key client.key</span>
+<span class="x">tls-auth ta.key 1</span>
+<span class="x">cipher AES-256-GCM</span>
+<span class="x">auth SHA256</span>
+<span class="x">key-direction 1</span>
+<span class="x">## Comment-out line berikut jika tidak menggunakan systemd-resolved</span>
+<span class="x">; script-security 2</span>
+<span class="x">; up /etc/openvpn/update-resolv-conf</span>
+<span class="x">; down /etc/openvpn/update-resolv-conf</span>
+<span class="x">## Comment-out line berikut jika menggunakan systemd-resolved</span>
+<span class="x">; script-security 2</span>
+<span class="x">; up /etc/openvpn/update-systemd-resolved</span>
+<span class="x">; down /etc/openvpn/update-systemd-resolved</span>
+<span class="x">; down-pre</span>
+<span class="x">; dhcp-option DOMAIN-ROUTE</span>
+</pre></div>
+<p>Setelah itu buat script untuk menggenerate config untuk client agar tidak perlu manual membuat config untuk setiap client:</p>
+<div class="highlight"><pre><span></span><span class="x">nano clients/client_base.sh</span>
+</pre></div>
+<p>dan isi dengan script berikut:</p>
+<div class="highlight"><pre><span></span><span class="x">#!/bin/bash</span>
+
+<span class="x"># First argument: Client identifier</span>
+
+<span class="x">KEY_DIR=/etc/openvpn/clients/keys</span>
+<span class="x">OUTPUT_DIR=/etc/openvpn/clients/files</span>
+<span class="x">BASE_CONFIG=/etc/openvpn/clients/base.conf</span>
+
+<span class="x">cat ${BASE_CONFIG} \</span>
+<span class="x">    &lt;(echo -e '&lt;ca&gt;') \</span>
+<span class="x">    ${KEY_DIR}/ca.crt \</span>
+<span class="x">    &lt;(echo -e '&lt;/ca&gt;\n&lt;cert&gt;') \</span>
+<span class="x">    ${KEY_DIR}/${1}.crt \</span>
+<span class="x">    &lt;(echo -e '&lt;/cert&gt;\n&lt;key&gt;') \</span>
+<span class="x">    ${KEY_DIR}/${1}.key \</span>
+<span class="x">    &lt;(echo -e '&lt;/key&gt;\n&lt;tls-crypt&gt;') \</span>
+<span class="x">    ${KEY_DIR}/ta.key \</span>
+<span class="x">    &lt;(echo -e '&lt;/tls-crypt&gt;') \</span>
+<span class="x">    &gt; ${OUTPUT_DIR}/${1}.ovpn</span>
+</pre></div>
+<p>jangan lupa mengedit permission file agar executable
+<code>chmox +x /etc/openvpn/clients/client_base.sh</code></p>
+<p>Selanjutnya generate config untuk client:</p>
+<div class="highlight"><pre><span></span>cd /etc/openvpn/clients
+bash client_base.sh client1
+</pre></div>
+<p>output file akan muncul di direktori /etc/openvpn/clients/file</p>
+<p>Sampai disini openvpn config sudah bisa di gunakan untuk client terhubung dengan openvpn server.</p>
+    <!-- <div class="aspect-w-16 aspect-h-9 mx-auto"></div> CSS placeholder -->
+  </div>
+  <footer class="flex flex-col mt-10 ">
+    <ul class="flex flex-wrap">
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="https://blog.ydnaz.id/tag/debian.html">debian</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="https://blog.ydnaz.id/tag/gnulinux.html">gnu/linux</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="https://blog.ydnaz.id/tag/linux.html">linux</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="https://blog.ydnaz.id/tag/network.html">network</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="https://blog.ydnaz.id/tag/openvpn.html">openvpn</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="https://blog.ydnaz.id/tag/vpn.html">vpn</a>
+        </li>
+    </ul>
+    <div class="flex w-full my-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
+      <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-l-lg">
+        <a class="flex flex-col pr-2" href="https://blog.ydnaz.id/Bhyve the BSD Hypervisor.html">
+          <div class="mx-4 py-2 text-left">
+            <p class="text-zinc-600 dark:text-zinc-300 text-sm">« PREV PAGE</p>
+            <p class="text-left py-1 hover:underline">Berkenalan dengan Bhyve The BSD Hypervisor</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="flex bg-zinc-200 dark:bg-zinc-700 py-2 rounded-lg justify-center space-x-2 text-xs">
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="twitter" aria-label="share Features on twitter"
+            href="https://twitter.com/intent/tweet/?text=Features&amp;url=https://blog.ydnaz.id/install-openvpn-di-debian-linux-server.html">
+            <i class="fab fa-twitter fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="linkedin" aria-label="share Features on linkedin"
+            href="https://www.linkedin.com/sharing/share-offsite/?url=https://blog.ydnaz.id/install-openvpn-di-debian-linux-server.html">
+            <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="reddit" aria-label="share Features on reddit"
+            href="https://reddit.com/submit?url=https://blog.ydnaz.id/install-openvpn-di-debian-linux-server.html">
+            <i class="fab fa-reddit fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="facebook" aria-label="share Features on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https://blog.ydnaz.id/install-openvpn-di-debian-linux-server.html">
+            <i class="fab fa-facebook fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="whatsapp" aria-label="share Features on whatsapp"
+            href="https://api.whatsapp.com/send?text=Features - https://blog.ydnaz.id/install-openvpn-di-debian-linux-server.html">
+            <i class="fab fa-whatsapp fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="telegram" aria-label="share Features on telegram"
+            href="https://telegram.me/share/url?text=Features&amp;url=https://blog.ydnaz.id/install-openvpn-di-debian-linux-server.html">
+            <i class="fab fa-telegram fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+  <div>
+  </div>
+</main>
+
+    </div>
+    <footer class="flex w-full text-xs justify-center mt-10 mb-6 text-zinc-600 dark:text-zinc-400">
+        <div class="px-4">
+            <span>©2015-2023&nbsp;&#8226;&nbsp;</span>Powered by
+            <a class="underline" href="https://getpelican.com/">Pelican</a>&nbsp;&
+            <a class="underline" href="https://github.com/aleylara/Papyrus">Papyrus</a>
+        </div>
+    </footer>
+
+
+    <script>
+        let themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        let themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+        let themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', function () {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
