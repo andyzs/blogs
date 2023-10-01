@@ -13,6 +13,11 @@ url = "/Volume Storage management di Windows.html"
 title = "Microsoft Storage Space"
 
 [[input.files]]
+path = "membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html"
+url = "/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html"
+title = "Membangun Cluster di Mariadb menggunakan Galera Cluster part 1"
+
+[[input.files]]
 path = "Bhyve the BSD Hypervisor.html"
 url = "/Bhyve the BSD Hypervisor.html"
 title = "Berkenalan dengan Bhyve The BSD Hypervisor"
@@ -21,3 +26,8 @@ title = "Berkenalan dengan Bhyve The BSD Hypervisor"
 path = "install-openvpn-di-debian-linux-server.html"
 url = "/install-openvpn-di-debian-linux-server.html"
 title = "Install dan setting Openvpn di Debian Jessie"
+
+[[input.files]]
+path = "apa-itu-cluster.html"
+url = "/apa-itu-cluster.html"
+title = "Apa itu Cluster?"

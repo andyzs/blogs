@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Pelican" />
+    <meta name="description" content="blog-ydnaz Blog Posts">
+    <title>Membangun Cluster di Mariadb menggunakan Galera Cluster part 1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
+    <link rel="stylesheet" type="text/css" href="/theme/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/theme/css/pygment.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/theme/css/stork.css">
+    <link rel="stylesheet" media="screen and (prefers-color-scheme: dark)"
+        href="/theme/css/stork-dark.css">
+    <link
+        href="/feeds/all.atom.xml"
+        type="application/atom+xml" rel="alternate" title="blog-ydnaz Atom Feed" />
+<meta name="description" content="Install dan konfigurasi Maridb Cluster" />
+</head>
+
+<body class="min-h-screen flex flex-col max-w-7xl lg:max-w-none text-zinc-800 bg-neutral-100 
+    dark:bg-neutral-900 dark:text-zinc-300 container mx-auto justify-center md:px-3 ">
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+    <nav class="sm:flex sm:justify-between xl:ml-32 pl-4 items-center">
+        <div class="flex pt-4">
+            <h1 class="font-semibold text-2xl"><a href="/">blog-ydnaz</a></h1>
+            <button id="theme-toggle" type="button" aria-label="Light|Dark"
+                class="text-zinc-700 dark:text-zinc-400 rounded-full focus:outline-none text-sm ml-2 p-1">
+                <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                        fill-rule="evenodd" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <ul class="flex flex-wrap lg:mr-24 md:pt-0">
+            <li class="mr-4 pt-6"><a  href="/archives.html">Archive</a></li>
+            <li class="mr-4 pt-6"><a                     href="/categories.html">Categories</a></li>
+            <li class="mr-4 pt-6"><a  href="/tags.html">Tags</a></li>
+            <li class="mr-4 pt-6"><a  href="/search.html">Search</a></li>
+        </ul>
+    </nav>
+    <div class="flex-grow md:max-w-screen-md md:mx-auto md:w-3/4 px-4">
+        <nav class="text-zinc-800 dark:text-zinc-300 mt-12 pb-2 md:mt-16" aria-label="Breadcrumb">
+            <ul class="p-0 inline-flex items-center">
+                <li class="flex items-center">
+                    <a href="/" class="text-zinc-800 dark:text-zinc-300 inline-flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
+                            </path>
+                        </svg>
+                        Home
+                    </a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+                <li class="flex items-center">
+                    <a href="/categories.html">Categories</a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+                <li class="flex items-center">
+                    <a href="/category/misc.html">misc</a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+            </ul>
+        </nav>
+
+<main>
+  <header>
+    <h1 class="font-semibold text-3xl my-2">Membangun Cluster di Mariadb menggunakan Galera Cluster part 1</h1>
+    <footer class="flex text-sm text-zinc-800 dark:text-zinc-400">
+      <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
+        <time>June 30, 2020</time>
+        <div>
+          <span>&nbsp;·&nbsp;{'minutes': 5} min read</span>
+        </div>
+        <div>
+          <span>&nbsp;·&nbsp;me</span>
+        </div>
+      </div>
+    </footer>
+  </header>
+  <div class="max-w-7xl container mx-auto my-8 text-zinc-800 dark:text-zinc-300  
+              prose lg:max-w-none prose-headings:text-zinc-800 prose-headings:dark:text-zinc-300 
+              prose-h1:text-3xl lg:prose-h1:text-3xl prose-headings:font-semibold 
+              prose-pre:bg-zinc-200 prose-pre:text-zinc-800
+              dark:prose-pre:bg-zinc-800 dark:prose-pre:text-zinc-200
+              prose-blockquote:text-zinc-800
+              dark:prose-blockquote:text-zinc-200
+              prose-a:text-slate-600 prose-a:font-normal
+              dark:prose-a:text-slate-400
+              dark:prose-strong:text-zinc-200 
+              dark:prose-code:text-zinc-200
+              dark:prose-code:bg-zinc-800
+              prose-code:bg-zinc-200
+              prose-code:font-light
+              prose-img:rounded-md
+              sm:text-left md:text-justify
+              ">
+    <p><strong><em>Introduction:</em></strong></p>
+<p>Untuk membuat Clustering Database system di MariaDB maka bisa menggunakan Galera. 
+Galera sendiri sudah termasuk kedalam paket instalasi pada MariaDB sehingga tidak dibutuhkan instalasi paket tambahan.
+Namun jika ingin menggunakan versi galera yang lebih tinggi seperti galera-3 di MariaDB 10.3 dan 
+galera-4 di MariaDB 10.4 maka butuh menambahlak paket <em>galera-3</em> dan <em>galera-4</em> untuk menginstall 
+wsrep provider librarynya.</p>
+<p>Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:</p>
+<ul>
+<li><strong><em>True Multi-Master</em></strong> 
+You can read and write to any node at any time. 
+Changes to data on one node will be replicated on all. </li>
+<li><strong><em>Synchronous Replication</em></strong> 
+There is no slave lag, so no data is lost if a node crashes.</li>
+<li><strong><em>Tightly Coupled</em></strong> 
+All nodes hold the same state. There is no diverged data between nodes. </li>
+<li><strong><em>Multi-Threaded Slave</em></strong> 
+This allows for better performance and for any workload. </li>
+<li><strong><em>No Master-Slave Failover</em></strong> 
+There is no need for master-slave operations or to use VIP. </li>
+<li><strong><em>Hot Standby</em></strong> 
+There is no downtime related to failures or intentionally taking down a node 
+for maintenance, since there is no failover. </li>
+<li><strong><em>Automatic Node Provisioning</em></strong> 
+There&rsquo;s no need to backup manually the database and copy it to the new node. </li>
+<li><strong><em>Supports InnoDB</em></strong> 
+The InnoDB storage engine provides for transactional tables. </li>
+<li><strong><em>Transparent to Applications</em></strong> 
+Generally, you won&rsquo;t have to change an application that will interface with the database
+ as a result of Galera. If you do, it will be minimal changes. </li>
+<li><strong><em>No Read and Write Splitting Needed</em></strong> 
+There is no need to split read and write queries.</li>
+</ul>
+<p>Pada tutorial ini instalasi di lakukan di OS Ubuntu 20.04, tutorial ini harusnya bisa juga di implementasikan di Debian 10 dan turunannya.</p>
+<p><strong><em>Requirements:</em></strong></p>
+<p>3 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance database server.
+1 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance proxy server.
+(optional) server bisa saling terhubung menggunakan hostname</p>
+<p>Server yang digunakan:</p>
+<div class="highlight"><pre><span></span><span class="x">192.168.30.63   db1</span>
+<span class="x">192.168.30.64   db2</span>
+<span class="x">192.168.30.64   db3</span>
+<span class="x">192.168.30.200  proxy</span>
+</pre></div>
+<p><strong><em>Proses Instalasi:</em></strong></p>
+<p>Seperti biasa lakukan update terlebih dahulu sebelum menginstall paket.</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">update</span>
+<span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">install</span><span class="w"> </span><span class="nx">mariadb</span><span class="o">-</span><span class="nx">server</span><span class="w"> </span><span class="nx">rsync</span>
+</pre></div>
+<p>Untuk Debian karena pada Debian 10 versi MariaDB-10 belum ada di repository, maka bisa menggunakan repo dari MariaDB</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">update</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">install</span><span class="w"> </span><span class="nx">dirmngr</span><span class="w"> </span><span class="nx">software</span><span class="o">-</span><span class="nx">properties</span><span class="o">-</span><span class="nx">common</span><span class="w"> </span>
+<span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="o">-</span><span class="nx">key</span><span class="w"> </span><span class="nx">adv</span><span class="w"> </span><span class="o">--</span><span class="nx">recv</span><span class="o">-</span><span class="nx">keys</span><span class="w"> </span><span class="o">--</span><span class="nx">keyserver</span><span class="w"> </span><span class="nx">hkp</span><span class="p">:</span><span class="c1">//keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 </span>
+<span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">add</span><span class="o">-</span><span class="nx">apt</span><span class="o">-</span><span class="nx">repository</span><span class="w"> </span><span class="err">'</span><span class="nx">deb</span><span class="w"> </span><span class="p">[</span><span class="nx">arch</span><span class="p">=</span><span class="nx">amd64</span><span class="p">]</span><span class="w"> </span><span class="nx">http</span><span class="p">:</span><span class="c1">//nyc2.mirrors.digitalocean.com/mariadb/repo/10.1/debian buster main'</span>
+<span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="nx">update</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">install</span><span class="w"> </span><span class="nx">mariadb</span><span class="o">-</span><span class="nx">server</span><span class="w"> </span><span class="nx">rsync</span>
+</pre></div>
+<p>Jalankan perintah itu untuk menginstall Mariadb di ketiga server.
+Setelah selesai instalasi, setting password root untuk database dan selanjutnya kita akan matikan service terlebih dahulu karna kita akan melakukan konfigurasi.</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">mysql</span><span class="w"> </span><span class="o">-</span><span class="nx">u</span><span class="w"> </span><span class="nx">root</span>
+</pre></div>
+<p>Kemudian setting password untuk MariaDB root</p>
+<div class="highlight"><pre><span></span><span class="n">MariaDB</span><span class="w"> </span><span class="p">[(</span><span class="n">none</span><span class="p">)]</span><span class="o">&gt;</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">password</span><span class="p">(</span><span class="s">"p@55w0Rd123"</span><span class="p">);</span>
+</pre></div>
+<p>Jika sukses maka output seperti ini akan muncul
+<img alt="mariadb1 img!" src="images/mariadb1.png" title="mariadb password success"/>
+Selanjutnya keluar dari mariadb dengan perintah </p>
+<div class="highlight"><pre><span></span><span class="n">MariaDB</span><span class="w"> </span><span class="o">[</span><span class="p">(</span><span class="n">none</span><span class="p">)</span><span class="o">]&gt;</span><span class="w"> </span><span class="err">\</span><span class="n">q</span>
+</pre></div>
+<p>Setlah itu kita akan melakukan config Galera, sebelum itu matikan terlebih dahulu servicenya.</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">systemctl</span><span class="w"> </span><span class="nx">stop</span><span class="w"> </span><span class="nx">mariadb</span>
+</pre></div>
+<p><strong><em>Setup Galera cluster</em></strong></p>
+<p>Konfigurasi Galera cluster ada di <code>/etc/mysql/mariadb.conf.d/50-galera.cnf</code>
+Edit file tersebut dan tambahkan config seperti berikut:
+<code>$ sudo vim /etc/mysql/mariadb.conf.d/50-galera.cnf</code></p>
+<div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mysqld</span><span class="p">]</span>
+<span class="n">binlog_format</span><span class="o">=</span><span class="n">ROW</span>
+<span class="n">default</span><span class="o">-</span><span class="n">storage</span><span class="o">-</span><span class="n">engine</span><span class="o">=</span><span class="n">innodb</span>
+<span class="n">innodb_autoinc_lock_mode</span><span class="o">=</span><span class="mi">2</span>
+<span class="n">bind</span><span class="o">-</span><span class="n">address</span><span class="o">=</span><span class="mf">192.168.30.63</span>
+
+<span class="c1"># Galera Provider Configuration</span>
+<span class="n">wsrep_on</span><span class="o">=</span><span class="n">ON</span>
+<span class="n">wsrep_provider</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">galera</span><span class="o">/</span><span class="n">libgalera_smm</span><span class="o">.</span><span class="n">so</span>
+
+<span class="n">wsrep_cluster_name</span><span class="o">=</span><span class="s2">"galera_cluster"</span>
+<span class="n">wsrep_cluster_address</span><span class="o">=</span><span class="s2">"gcomm://192.168.30.63,192.168.30.64,192.168.30.65"</span>
+
+<span class="n">wsrep_sst_method</span><span class="o">=</span><span class="n">rsync</span>
+
+<span class="n">wsrep_node_address</span><span class="o">=</span><span class="s2">"192.168.30.63"</span>
+<span class="n">wsrep_node_name</span><span class="o">=</span><span class="s2">"db1"</span>
+</pre></div>
+<p>Karena kita sudah setting binding-address IP kita di <strong>50-galera.cnf</strong> maka kita akan menghapus setting tersebut dari file <strong>50-server.cnf</strong></p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">sed</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="err">'</span><span class="nx">s</span><span class="o">/</span><span class="nx">bind</span><span class="o">-</span><span class="nx">address</span><span class="o">/</span><span class="err">#</span><span class="nx">bind</span><span class="o">-</span><span class="nx">address</span><span class="o">/</span><span class="nx">g</span><span class="err">'</span><span class="w">  </span><span class="o">/</span><span class="nx">etc</span><span class="o">/</span><span class="nx">mysql</span><span class="o">/</span><span class="nx">mariadb</span><span class="p">.</span><span class="nx">conf</span><span class="p">.</span><span class="nx">d</span><span class="o">/</span><span class="mi">50</span><span class="o">-</span><span class="nx">server</span><span class="p">.</span><span class="nx">cnf</span>
+</pre></div>
+<p>Selanjutnya edit di node berikutnya file <strong>50-galera.cnf</strong> tersebut, isi dari config boleh di copy, yang perlu diubah hanya pada bagian berikut</p>
+<div class="highlight"><pre><span></span><span class="x">wsrep_node_address=</span>
+<span class="x">wsrep_node_name=</span>
+</pre></div>
+<p>ganti dengan hostname dan ip dari masing-masing server. </p>
+<p><strong><em>Firwall Config (Optional)</em></strong>
+Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, namun untuk production sangat disarankan agar service tersebut dinyalakan. Untuk management firewall di Debian Base bisa menggunakan UFW ataupun Firewalld seperti di keluarga <strong>RedHat</strong>, namun agar lebih seragam maka tutorial ini akan menggunakan UFW sebagai manajemen firewallnya.</p>
+<p>Port yang perlu di buka agar service-service yang dibutuhkan untuk Galera Cluster bisa berfungsi:</p>
+<ul>
+<li><strong>3306</strong> Port yang digunakan untuk MySQL/MariaDB Database berkomunikasi, merupakan default service port (meskipun port ini bisa diubah tetapi tidak direkomendasikan untuk mengubahnya).</li>
+<li><strong>4567</strong> Port untuk Galera Cluster Replication traffic. Multicast replication akan menggunakan UDP dan TCP pada port ini.</li>
+<li><strong>4568</strong> Port untuk incremental transfer state.</li>
+<li><strong>4444</strong> Port untuk fitur lain seperti snapshot dari galera service.</li>
+</ul>
+<p>Untuk mengallow akses firewall pada ufw menggunakan command berikut:</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">ufw</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="nx">from</span><span class="w"> </span><span class="mf">192.168.30.0</span><span class="o">/</span><span class="mi">24</span><span class="w"> </span><span class="nx">proto</span><span class="w"> </span><span class="nx">tcp</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="kt">any</span><span class="w"> </span><span class="nx">port</span><span class="w"> </span><span class="mi">3306</span><span class="p">,</span><span class="mi">4567</span><span class="p">,</span><span class="mi">4568</span><span class="p">,</span><span class="mi">4444</span>
+<span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">ufw</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="nx">from</span><span class="w"> </span><span class="mf">192.168.30.0</span><span class="o">/</span><span class="mi">24</span><span class="w"> </span><span class="nx">proto</span><span class="w"> </span><span class="nx">udp</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="kt">any</span><span class="w"> </span><span class="nx">port</span><span class="w"> </span><span class="mi">4567</span>
+</pre></div>
+<p>Perhatikan perintah diatas, ubah ip dan subnet sesuai dengan subnet yang digunakan, atau jika ingin mengallow ke semua <strong>(kurang aman dan kurang direkomendasikan)</strong> bisa menggunakan perintah berikut:</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">ufw</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="mi">3306</span><span class="p">,</span><span class="mi">4567</span><span class="p">,</span><span class="mi">4568</span><span class="p">,</span><span class="mi">4444</span><span class="o">/</span><span class="nx">tcp</span>
+<span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">ufw</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="mi">4567</span><span class="o">/</span><span class="nx">udp</span>
+</pre></div>
+<p><strong><em>Start Galera Cluster</em></strong>
+Selanjutnya start Galera Cluster dari node pertama</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">galera_new_cluster</span>
+</pre></div>
+<p>Selanjutnya cek status wsrep dengan login ke mysql shell</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">mysql</span><span class="w"> </span><span class="o">-</span><span class="nx">u</span><span class="w"> </span><span class="nx">root</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="o">-</span><span class="nx">e</span><span class="w"> </span><span class="s">"SHOW STATUS LIKE 'wsrep_cluster_size'"</span>
+</pre></div>
+<p>Jika sukses maka akan muncul tampilan berikut:</p>
+<p>Selanjutnya start service mariadb-server di node 2 dan 3</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">systemctl</span><span class="w"> </span><span class="nx">start</span><span class="w"> </span><span class="nx">mysql</span>
+</pre></div>
+<p>dan cek kembali wsrep status nya, jika server db node 2 dan 3 juga sukses, maka ukuran <strong>wsrep_cluster_size</strong> nya akan bertambah seperti gambar berikut:</p>
+<p>Sampai disini dulu tutorial <strong>part 1</strong> ini, untuk testing replication akan kita sambung di part berikutnya.<br/>
+😁 😁 😁</p>
+    <!-- <div class="aspect-w-16 aspect-h-9 mx-auto"></div> CSS placeholder -->
+  </div>
+  <footer class="flex flex-col mt-10 ">
+    <ul class="flex flex-wrap">
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="/tag/cluster.html">cluster</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="/tag/database.html">database</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="/tag/linux.html">linux</a>
+        </li>
+        <li
+          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
+          <a href="/tag/mariadb.html">Mariadb</a>
+        </li>
+    </ul>
+    <div class="flex w-full my-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
+      <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-l-lg">
+        <a class="flex flex-col pr-2" href="/Volume Storage management di Windows.html">
+          <div class="mx-4 py-2 text-left">
+            <p class="text-zinc-600 dark:text-zinc-300 text-sm">« PREV PAGE</p>
+            <p class="text-left py-1 hover:underline">Microsoft Storage Space</p>
+          </div>
+        </a>
+      </div>
+      <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-r-lg ">
+        <a class="flex flex-col" href="/Bhyve the BSD Hypervisor.html">
+          <div class="text-right mx-4 py-2">
+            <p class="text-zinc-600 dark:text-zinc-300 text-sm">NEXT PAGE »</p>
+            <p class="text-right py-1 hover:underline">Berkenalan dengan Bhyve The BSD Hypervisor</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="flex bg-zinc-200 dark:bg-zinc-700 py-2 rounded-lg justify-center space-x-2 text-xs">
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="twitter" aria-label="share Features on twitter"
+            href="https://twitter.com/intent/tweet/?text=Features&amp;url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            <i class="fab fa-twitter fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="linkedin" aria-label="share Features on linkedin"
+            href="https://www.linkedin.com/sharing/share-offsite/?url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="reddit" aria-label="share Features on reddit"
+            href="https://reddit.com/submit?url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            <i class="fab fa-reddit fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="facebook" aria-label="share Features on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            <i class="fab fa-facebook fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="whatsapp" aria-label="share Features on whatsapp"
+            href="https://api.whatsapp.com/send?text=Features - /membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            <i class="fab fa-whatsapp fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="telegram" aria-label="share Features on telegram"
+            href="https://telegram.me/share/url?text=Features&amp;url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            <i class="fab fa-telegram fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+  <div>
+  </div>
+</main>
+
+    </div>
+    <footer class="flex w-full text-xs justify-center mt-10 mb-6 text-zinc-600 dark:text-zinc-400">
+        <div class="px-4">
+            <span>©2015-2023&nbsp;&#8226;&nbsp;</span>Powered by Pelican &nbsp;& Papyrus
+        </div>
+    </footer>
+
+
+    <script>
+        let themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        let themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+        let themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', function () {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
