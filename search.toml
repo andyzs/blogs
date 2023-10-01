@@ -1,6 +1,6 @@
 [input]
 html_selector = "main"
-base_directory = "output"
+base_directory = "/homestore1/smbshare/Andi/blog-ydnaz/output"
 
 [[input.files]]
 path = "Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html"
