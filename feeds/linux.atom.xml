@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>blog-ydnaz - Linux</title><link href="/" rel="alternate"></link><link href="/feeds/linux.atom.xml" rel="self"></link><id>/</id><updated>2017-04-16T23:40:00+07:00</updated><entry><title>Install dan setting Openvpn di Debian Jessie</title><link href="/install-openvpn-di-debian-linux-server.html" rel="alternate"></link><published>2015-04-12T23:27:00+07:00</published><updated>2017-04-16T23:40:00+07:00</updated><author><name>me</name></author><id>tag:None,2015-04-12:/install-openvpn-di-debian-linux-server.html</id><summary type="html">&lt;p&gt;Cara menginstall openvpn di debian linux&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;em&gt;VPN&lt;/em&gt; atau &lt;code&gt;virtual private network&lt;/code&gt; protokol jaringan untuk membuat tunnel jaringan diantara komputer yang bukan berada di satu jaringan lokal untuk dapat berkomunikasi secara aman. &lt;/p&gt;
+&lt;p&gt;Pada artikel kali ini saya akan menulis &lt;em&gt;how-to&lt;/em&gt; / tutorial menginstall dan menyetting OpenVPN server di Debian Jessie. &lt;/p&gt;
+&lt;h5&gt;Install&lt;/h5&gt;
+&lt;p&gt;Seperti biasa sebelum menginstall packet baru di server sebaiknya kita mengupdate system kita terlebih dahulu.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo apt get update &amp;amp;&amp;amp; sudo apt get upgrade&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;lalu install paket-paket yang dibutuhkan oleh openvpn&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo apt install openvpn easy-rsa&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Dengan demikian &lt;code&gt;OpenVPN&lt;/code&gt; sudah terinstall, selanjutnya kita akan mengkonfigurasinya.&lt;/p&gt;
+&lt;h5&gt;Setting OpenVPN  serta Buat Sertifikat dan key&lt;/h5&gt;
+&lt;p&gt;Direktori tempat &lt;code&gt;OpenVPN&lt;/code&gt; menyimpan file konfigurasinya secara &lt;em&gt;default&lt;/em&gt; ada &lt;code&gt;/etc/openvpn/&lt;/code&gt; kita akan meletakan semua file yang dibutuhkan untuk mengkonfigurasi server di direktori tersebut.
+&lt;code&gt;OpenVPN&lt;/code&gt; server menyertakan contoh file konfigurasinya untuk mempermudah pengguna melakukan konfigurasi, meskipun kita bisa membuat sendiri file konfigurasi ini.&lt;/p&gt;
+&lt;p&gt;Untuk mengcopy file &lt;em&gt;sample&lt;/em&gt; ini dan meletakannya di direktori &lt;code&gt;/etc/openvpn&lt;/code&gt; kita bisa melakukan dengan perintah berikut:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz &amp;gt; /etc/openvpn/server.conf&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya kita akan menyetting dan menyesuaikan file konfigurasi &lt;code&gt;server.conf&lt;/code&gt; ini.&lt;/p&gt;
+&lt;p&gt;Beberapa perubahan utama yang akan kita buat pada file konfig adalah:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Meningkatkan level enkripsi &lt;/li&gt;
+&lt;li&gt;Meneruskan &lt;em&gt;web traffic&lt;/em&gt; ke alamat tujuan&lt;/li&gt;
+&lt;li&gt;Mencegah bocornya DNS &lt;em&gt;request&lt;/em&gt; keluar dari koneksi VPN &lt;/li&gt;
+&lt;li&gt;Menyetting &lt;em&gt;permission&lt;/em&gt; dan memperkuatnya&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;tapi kita menyesuaikan settingan file konfig di &lt;code&gt;server.conf&lt;/code&gt; kita akan terlebih dahulu membuat sertifikat dan key, yang akan digunakan sebagai autentikasi untuk &lt;code&gt;OpenVPN&lt;/code&gt; server kita.
+Pertama kita akan meng&lt;em&gt;copy&lt;/em&gt; &lt;code&gt;Easy-rsa&lt;/code&gt; &lt;em&gt;generation script&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo cp -r /usr/share/easy-rsa/ /etc/openvpn&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya buat direktori tempat kita menyimpan key dan sertifikat &lt;code&gt;OpenVPN&lt;/code&gt; kita.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo mkdir /etc/openvpn/easy-rsa/keys&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;kemudian buat &lt;em&gt;symbolic links&lt;/em&gt; dari &lt;code&gt;openssl-1.0.0.cnf&lt;/code&gt; ke &lt;code&gt;openssl.cnf&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo ln -s openssl-1.0.0.cnf openssl.cnf&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Setelah itu kita akan menyetting parameter untuk &lt;em&gt;certificate&lt;/em&gt; kita sebelum sertifikat itu di buat.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo nano /etc/openvpn/easy-rsa/vars&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Pada file ini variable berikut adalah yg perlu diganti dan dibuat sesuai informasi kita inginkan:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;export KEY_COUNTRY="US" &lt;/span&gt;
+&lt;span class="x"&gt;export KEY_PROVINCE="TX" &lt;/span&gt;
+&lt;span class="x"&gt;export KEY_CITY="Dallas" &lt;/span&gt;
+&lt;span class="x"&gt;export KEY_ORG="My Company Name" &lt;/span&gt;
+&lt;span class="x"&gt;export KEY_EMAIL="sammy@example.com" &lt;/span&gt;
+&lt;span class="x"&gt;export KEY_OU="MYOrganizationalUnit" &lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;sedang variable lain, tidak perlu diganti kecuali memang paham apa yang akan dilakukan.&lt;/p&gt;
+&lt;p&gt;Selanjutnya kita akan pindah ke direktori &lt;code&gt;/etc/openvpn&lt;/code&gt; untuk meng&lt;em&gt;generate&lt;/em&gt; &lt;em&gt;Diffie-Helman&lt;/em&gt; parameter menggunakan &lt;em&gt;tool&lt;/em&gt; bawaan dari OPENSSL bernama &lt;code&gt;dhparam&lt;/code&gt; &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;cd /etc/openvpn&lt;/span&gt;
+&lt;span class="x"&gt;sudo openssl dhparam -out /etc/openvpn/easy-rsa/keys/dh4096.pem 4096&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;opsi -out diatas mendefinisikan lokasi output hasil &lt;em&gt;generate&lt;/em&gt; dari dhparam.&lt;/p&gt;
+&lt;p&gt;Dengan demikian &lt;em&gt;dhparam&lt;/em&gt;  kita telah berhasil dibuat, selanjutnya kita akan meng&lt;em&gt;generate&lt;/em&gt; &lt;em&gt;certificate&lt;/em&gt; server  dan server &lt;em&gt;key&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Untuk menggenerate server &lt;em&gt;key&lt;/em&gt; dan server &lt;em&gt;certificate&lt;/em&gt; kita akan pindah satu direktori ke direktory &lt;em&gt;easy-rsa&lt;/em&gt; dan meng&lt;em&gt;generate&lt;/em&gt; pki (Public Key Infrastructure) dari file &lt;code&gt;vars&lt;/code&gt; yang telah kita setting variablenya sebelumnya&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;cd easy-rsa&lt;/span&gt;
+&lt;span class="x"&gt;sudo . ./vars&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;sup&gt;perhatikan tanda spasi (white space) diantara titik, saat meng&lt;em&gt;generate&lt;/em&gt; pki diatas. &lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Saat menjalankan perintah diatas kita akan mendapatkan notif :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;NOTE&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;If&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;you&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;will&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;be&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;doing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rm&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rf&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;on&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/etc/openvpn/easy-rsa/&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya jalankan clean-all untuk mencegah &lt;em&gt;key&lt;/em&gt; lain yang mungkin konflik dengan &lt;em&gt;key&lt;/em&gt; server kita nanti, dan membuat ca &lt;em&gt;certificate&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo ./clean-all
+sudo ./build-ca
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Perintah &lt;code&gt;./build-ca&lt;/code&gt; diatas akan memanggil open-ssl interaktif dan memberikan beberapa &lt;em&gt;challange question&lt;/em&gt; seperti berikut:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;Generating a 1024 bit RSA private key&lt;/span&gt;
+&lt;span class="x"&gt;............++++++&lt;/span&gt;
+&lt;span class="x"&gt;...........++++++&lt;/span&gt;
+&lt;span class="x"&gt;writing new private key to 'ca.key'&lt;/span&gt;
+&lt;span class="x"&gt;-----&lt;/span&gt;
+&lt;span class="x"&gt;You are about to be asked to enter information that will be incorporated&lt;/span&gt;
+&lt;span class="x"&gt;into your certificate request.&lt;/span&gt;
+&lt;span class="x"&gt;What you are about to enter is what is called a Distinguished Name or a DN.&lt;/span&gt;
+&lt;span class="x"&gt;There are quite a few fields but you can leave some blank&lt;/span&gt;
+&lt;span class="x"&gt;For some fields there will be a default value,&lt;/span&gt;
+&lt;span class="x"&gt;If you enter '.', the field will be left blank.&lt;/span&gt;
+&lt;span class="x"&gt;-----&lt;/span&gt;
+&lt;span class="x"&gt;Country Name (2 letter code) [KG]:&lt;/span&gt;
+&lt;span class="x"&gt;State or Province Name (full name) [NA]:&lt;/span&gt;
+&lt;span class="x"&gt;Locality Name (eg, city) [BISHKEK]:&lt;/span&gt;
+&lt;span class="x"&gt;Organization Name (eg, company) [OpenVPN-TEST]:&lt;/span&gt;
+&lt;span class="x"&gt;Organizational Unit Name (eg, section) []:&lt;/span&gt;
+&lt;span class="x"&gt;Common Name (eg, your name or your server's hostname) []:OpenVPN-CA&lt;/span&gt;
+&lt;span class="x"&gt;Email Address [me@myhost.mydomain]:&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Dengan demikian kita sudah memiliki &lt;em&gt;certificate&lt;/em&gt; ca master kita, selanjutnya kita akan membuat  &lt;em&gt;key&lt;/em&gt; server dan &lt;em&gt;certificate&lt;/em&gt; server untuk openvpn server dengan perintah berikut:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo ./build-key-server server&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;kita akan kembali mendapatkan &lt;em&gt;challenge question&lt;/em&gt; interaktif dengan tambahan extra 2 pertanyaan seperti ini:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+
+Sign the certificate? [y/n]
+1 out of 1 certificate requests certified, commit? [y/n]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;sup&gt;seluruh pertanyaan challenge question sebaiknya dibiarkan bernilai default saja dengan menekan &lt;code&gt;enter&lt;/code&gt;, karna kita sudah menyetting nilai variabelnya di file &lt;code&gt;vars&lt;/code&gt;. Untuk extra pada saat membuat server &lt;em&gt;key&lt;/em&gt; dan server &lt;em&gt;certificate&lt;/em&gt; biarkan bernilai kosong.&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Setelah itu, selanjutnya kita akan mengcopy semua file kedalam directory &lt;em&gt;keys&lt;/em&gt; yang sudah kita buat sebelumnya  dan merubah permission dari direktori tersebut supaya lebih aman.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo cp /etc/openvpn/easy-rsa/keys/{server.crt,server.key,ca.crt} /etc/openvpn&lt;/span&gt;
+&lt;span class="x"&gt;sudo chmod 400 /etc/openvpn/easy-rsa/keys&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya kita akan kembali ke directory &lt;code&gt;openvpn&lt;/code&gt; untuk melanjutkan mengubah settingan dari file config.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;cd /etc/openvpn&lt;/span&gt;
+&lt;span class="x"&gt;sudo nano server.conf&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;beberapa hal yang akan kita ubah:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;mendefinisikan lokasi sertifikat master ca, dan server &lt;em&gt;certificate&lt;/em&gt; and server &lt;em&gt;key&lt;/em&gt; berada&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# Any X509 key management system can be used.
+# OpenVPN can also use a PKCS #12 formatted key file
+# (see "pkcs12" directive in man page).
+ca /etc/openvpn/keys/ca.crt
+cert /etc/openvpn/keys/openvpn-server.crt
+key /etc/openvpn/keys/openvpn-server.key 
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;mengubah dhparam dari default 1024 ke 4096, sesuai dengan nilai key &lt;code&gt;dhparam&lt;/code&gt; yang kita buat sebelumnya.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# Diffie hellman parameters.&lt;/span&gt;
+&lt;span class="x"&gt;# Generate your own with:&lt;/span&gt;
+&lt;span class="x"&gt;#   openssl dhparam -out dh1024.pem 1024&lt;/span&gt;
+&lt;span class="x"&gt;# Substitute 2048 for 1024 if you are using&lt;/span&gt;
+&lt;span class="x"&gt;# 2048 bit keys.&lt;/span&gt;
+&lt;span class="x"&gt;dh dh4096.pem&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;ijinkan opsi push "redirect-gateway" dengan menghapus &lt;em&gt;comment(;)&lt;/em&gt; nya.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;;push "redirect-gateway def1 bypass-dhcp"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;hapus &lt;em&gt;comment&lt;/em&gt; dari opsi &lt;code&gt;push "dhcp-option"&lt;/code&gt; dan gantilah alamt DNS dengan alamat DNS yang kita ingin gunakan.
+Kita bisa menggunakan opsi DNS dari &lt;a href="https://www.lifewire.com/free-and-public-dns-servers-2626062"&gt;daftar public DNS ini&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# Certain Windows-specific network settings&lt;/span&gt;
+&lt;span class="x"&gt;# can be pushed to clients, such as DNS&lt;/span&gt;
+&lt;span class="x"&gt;# or WINS server addresses.  CAVEAT:&lt;/span&gt;
+&lt;span class="x"&gt;# http://openvpn.net/faq.html#dhcpcaveats&lt;/span&gt;
+&lt;span class="x"&gt;# The addresses below refer to the public&lt;/span&gt;
+&lt;span class="x"&gt;# DNS servers provided by opendns.com.&lt;/span&gt;
+&lt;span class="x"&gt;;push "dhcp-option DNS 208.67.222.222"&lt;/span&gt;
+&lt;span class="x"&gt;;push "dhcp-option DNS 208.67.220.220"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya kita akan membuat user tanpa login shell dan &lt;em&gt;privileges root&lt;/em&gt; dan menyetting &lt;code&gt;user&lt;/code&gt; dan &lt;code&gt;group&lt;/code&gt;, karna secara &lt;em&gt;default&lt;/em&gt; &lt;code&gt;openvpn&lt;/code&gt; berjalan dengan akun &lt;em&gt;root&lt;/em&gt; atau superuser, maka untuk meningkatkan keamanan kita akan merubah ini, agar setelah berjalan di &lt;em&gt;background&lt;/em&gt; openvpn server menurukan &lt;em&gt;privileges&lt;/em&gt;nya menjadi user yang baru kita buat.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo adduser --system --shell /usr/sbin/nologin --no-create-home openvpn&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;kemudian cari baris berikut, hapus &lt;em&gt;comment&lt;/em&gt;nya dan ganti &lt;em&gt;user&lt;/em&gt;nya.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# You can uncomment this out on&lt;/span&gt;
+&lt;span class="x"&gt;# non-Windows systems.&lt;/span&gt;
+&lt;span class="x"&gt;;user nobody&lt;/span&gt;
+&lt;span class="x"&gt;;group nogroup&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;menjadi seperti ini &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# You can uncomment this out on&lt;/span&gt;
+&lt;span class="x"&gt;# non-Windows systems.&lt;/span&gt;
+&lt;span class="x"&gt;user openvpn&lt;/span&gt;
+&lt;span class="x"&gt;group nogroup&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Opsi lain yang bisa ditambahkan atau di ubah untuk memperkuat openvpn server kita seperti
+* merubah &lt;em&gt;chipper&lt;/em&gt; dari 128 menjadi 256&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;echo 'cipher AES-256-CBC' &amp;gt;&amp;gt; /etc/openvpn/server.conf&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;merubah auth dari default SHA-1 dengan SHA-2 512&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;echo 'auth SHA512' &amp;gt;&amp;gt; /etc/openvpn/server.conf&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;meningkatkan VPN kontrol channel dengan &lt;em&gt;chipper suite&lt;/em&gt; yang lebih kuat sesuai refrensi &lt;a href="https://community.openvpn.net/openvpn/wiki/Hardening#Useof--tls-cipher"&gt;disini&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;echo 'tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-128-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-128-CBC-SHA' &amp;gt;&amp;gt; /etc/openvpn/server.conf        &lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;menggunakan opsi --tls-auth
+Untuk menggunakan opsi ini, kita harus meng&lt;em&gt;generate&lt;/em&gt;nya terlebih dahulu&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo openvpn --genkey --secret easy-rsa/keys/ta.key&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Kemudian ubah opsi tls-auth di config menjadi seperti ini&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# The server and each client must have&lt;/span&gt;
+&lt;span class="x"&gt;# a copy of this key.&lt;/span&gt;
+&lt;span class="x"&gt;# The second parameter should be '0'&lt;/span&gt;
+&lt;span class="x"&gt;# on the server and '1' on the clients.&lt;/span&gt;
+&lt;span class="x"&gt;tls-auth /etc/openvpn/easy-rsa/keys/ta.key 0 # This file is secret&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya kita akan mengkonfigurasi firewall dan enable &lt;em&gt;packet forwarding&lt;/em&gt;
+* enable &lt;em&gt;packet forwarding&lt;/em&gt; untuk mengijinkan opsi ini maka kita akan merubah baris di &lt;code&gt;/etc/sysctl.conf&lt;/code&gt;
+dari &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# Uncomment the next line to enable packet forwarding for IPv4&lt;/span&gt;
+&lt;span class="x"&gt;#net.ipv4.ip_forward=1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;menjadi seperti ini&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# Uncomment the next line to enable packet forwarding for IPv4&lt;/span&gt;
+&lt;span class="x"&gt;net.ipv4.ip_forward=1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Install dan Setting &lt;code&gt;ufw&lt;/code&gt;. UFW adalah front-end untuk mempermudah manajemen dan administrasi dari linux IPTables.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo apt install ufw&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;kemudian ubah default &lt;em&gt;policy&lt;/em&gt;
+dari seperti ini&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;DEFAULT_FORWARD_POLICY="DROP"
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;menjadi &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;DEFAULT_FORWARD_POLICY="ACCEPT"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya kita akan menambahkan rules baru untuk &lt;code&gt;openvpn&lt;/code&gt; pada UFW.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;nano /etc/ufw/before.rules
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;kemudian tambahkan baris berikut sebelum baris terahir &lt;code&gt;Don't delete&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;# START OPENVPN RULES&lt;/span&gt;
+&lt;span class="x"&gt;# NAT table rules&lt;/span&gt;
+&lt;span class="x"&gt;*nat&lt;/span&gt;
+&lt;span class="x"&gt;:POSTROUTING ACCEPT [0:0]&lt;/span&gt;
+&lt;span class="x"&gt;# Allow traffic from OpenVPN client to eth0&lt;/span&gt;
+&lt;span class="x"&gt;-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE&lt;/span&gt;
+&lt;span class="x"&gt;COMMIT&lt;/span&gt;
+&lt;span class="x"&gt;# END OPENVPN RULES&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya kita akan mengijinkan koneksi service seperti ssh, web server serta openvpn ke ufw dan menjalankan ufw &lt;em&gt;service&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo ufw allow ssh&lt;/span&gt;
+&lt;span class="x"&gt;sudo ufw allow http&lt;/span&gt;
+&lt;span class="x"&gt;sudo ufw allow https&lt;/span&gt;
+&lt;span class="x"&gt;sudo ufw allow 1194/udp&lt;/span&gt;
+&lt;span class="x"&gt;sudo ufw enable&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;jika kita ingin mengecek status ufw bisa dilakukan dengan perintah:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;sudo ufw status&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya &lt;em&gt;save&lt;/em&gt; dan &lt;em&gt;restart service&lt;/em&gt; openvpn server&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;systemctl restart openvpn&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Hingga disini openvpn server sudah dapat digunakan, selanjutnya kita akan meng&lt;em&gt;generate&lt;/em&gt; dan setting &lt;em&gt;certificate&lt;/em&gt; untuk client agar dapat terhubung dengan openvpn.&lt;/p&gt;
+&lt;p&gt;Untuk setting dan generate client maka buat terlebih dahulu direktory tempat menyimpan client config dan copy base config example bawaan dari openvpn&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;mkdir -p /etc/openvpn/clients/files&lt;/span&gt;
+&lt;span class="x"&gt;cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/clients/base.conf&lt;/span&gt;
+&lt;span class="x"&gt;````&lt;/span&gt;
+&lt;span class="x"&gt;Kemudian edit file base.conf&lt;/span&gt;
+
+&lt;span class="x"&gt;```php&lt;/span&gt;
+&lt;span class="x"&gt;# The hostname/IP and port of the server.&lt;/span&gt;
+&lt;span class="x"&gt;# You can have multiple remote entries&lt;/span&gt;
+&lt;span class="x"&gt;# to load balance between the servers.&lt;/span&gt;
+&lt;span class="x"&gt;remote your_server_ip 1194&lt;/span&gt;
+&lt;span class="x"&gt;proto udp&lt;/span&gt;
+&lt;span class="x"&gt;# Downgrade privileges after initialization (non-Windows only)&lt;/span&gt;
+&lt;span class="x"&gt;user nobody&lt;/span&gt;
+&lt;span class="x"&gt;group nogroup&lt;/span&gt;
+&lt;span class="x"&gt;ca ca.crt&lt;/span&gt;
+&lt;span class="x"&gt;cert client.crt&lt;/span&gt;
+&lt;span class="x"&gt;key client.key&lt;/span&gt;
+&lt;span class="x"&gt;tls-auth ta.key 1&lt;/span&gt;
+&lt;span class="x"&gt;cipher AES-256-GCM&lt;/span&gt;
+&lt;span class="x"&gt;auth SHA256&lt;/span&gt;
+&lt;span class="x"&gt;key-direction 1&lt;/span&gt;
+&lt;span class="x"&gt;## Comment-out line berikut jika tidak menggunakan systemd-resolved&lt;/span&gt;
+&lt;span class="x"&gt;; script-security 2&lt;/span&gt;
+&lt;span class="x"&gt;; up /etc/openvpn/update-resolv-conf&lt;/span&gt;
+&lt;span class="x"&gt;; down /etc/openvpn/update-resolv-conf&lt;/span&gt;
+&lt;span class="x"&gt;## Comment-out line berikut jika menggunakan systemd-resolved&lt;/span&gt;
+&lt;span class="x"&gt;; script-security 2&lt;/span&gt;
+&lt;span class="x"&gt;; up /etc/openvpn/update-systemd-resolved&lt;/span&gt;
+&lt;span class="x"&gt;; down /etc/openvpn/update-systemd-resolved&lt;/span&gt;
+&lt;span class="x"&gt;; down-pre&lt;/span&gt;
+&lt;span class="x"&gt;; dhcp-option DOMAIN-ROUTE&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Setelah itu buat script untuk menggenerate config untuk client agar tidak perlu manual membuat config untuk setiap client:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;nano clients/client_base.sh&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;dan isi dengan script berikut:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class="x"&gt;# First argument: Client identifier&lt;/span&gt;
+
+&lt;span class="x"&gt;KEY_DIR=/etc/openvpn/clients/keys&lt;/span&gt;
+&lt;span class="x"&gt;OUTPUT_DIR=/etc/openvpn/clients/files&lt;/span&gt;
+&lt;span class="x"&gt;BASE_CONFIG=/etc/openvpn/clients/base.conf&lt;/span&gt;
+
+&lt;span class="x"&gt;cat ${BASE_CONFIG} \&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;lt;(echo -e '&amp;lt;ca&amp;gt;') \&lt;/span&gt;
+&lt;span class="x"&gt;    ${KEY_DIR}/ca.crt \&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;lt;(echo -e '&amp;lt;/ca&amp;gt;\n&amp;lt;cert&amp;gt;') \&lt;/span&gt;
+&lt;span class="x"&gt;    ${KEY_DIR}/${1}.crt \&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;lt;(echo -e '&amp;lt;/cert&amp;gt;\n&amp;lt;key&amp;gt;') \&lt;/span&gt;
+&lt;span class="x"&gt;    ${KEY_DIR}/${1}.key \&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;lt;(echo -e '&amp;lt;/key&amp;gt;\n&amp;lt;tls-crypt&amp;gt;') \&lt;/span&gt;
+&lt;span class="x"&gt;    ${KEY_DIR}/ta.key \&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;lt;(echo -e '&amp;lt;/tls-crypt&amp;gt;') \&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;gt; ${OUTPUT_DIR}/${1}.ovpn&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;jangan lupa mengedit permission file agar executable
+&lt;code&gt;chmox +x /etc/openvpn/clients/client_base.sh&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Selanjutnya generate config untuk client:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cd /etc/openvpn/clients
+bash client_base.sh client1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;output file akan muncul di direktori /etc/openvpn/clients/file&lt;/p&gt;
+&lt;p&gt;Sampai disini openvpn config sudah bisa di gunakan untuk client terhubung dengan openvpn server.&lt;/p&gt;</content><category term="Linux"></category><category term="openvpn"></category><category term="vpn"></category><category term="gnu/linux"></category><category term="debian"></category><category term="linux"></category><category term="network"></category></entry></feed>
