@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Pelican" />
+    <meta name="description" content="blog-ydnaz Blog Posts">
+    <title>Use LVM-cache for Storage Tiering to speed up spinning disk with small SSD.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
+    <link rel="stylesheet" type="text/css" href="/theme/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/theme/css/pygment.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/theme/css/stork.css">
+    <link rel="stylesheet" media="screen and (prefers-color-scheme: dark)"
+        href="/theme/css/stork-dark.css">
+    <link
+        href="/feeds/all.atom.xml"
+        type="application/atom+xml" rel="alternate" title="blog-ydnaz Atom Feed" />
+<meta name="description" content="How to setup lvm-cache" />
+</head>
+
+<body class="min-h-screen flex flex-col max-w-7xl lg:max-w-none text-zinc-800 bg-neutral-100 
+    dark:bg-neutral-900 dark:text-zinc-300 container mx-auto justify-center md:px-3 ">
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+    <nav class="sm:flex sm:justify-between xl:ml-32 pl-4 items-center">
+        <div class="flex pt-4">
+            <h1 class="font-semibold text-2xl"><a href="/">blog-ydnaz</a></h1>
+            <button id="theme-toggle" type="button" aria-label="Light|Dark"
+                class="text-zinc-700 dark:text-zinc-400 rounded-full focus:outline-none text-sm ml-2 p-1">
+                <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                        fill-rule="evenodd" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <ul class="flex flex-wrap lg:mr-24 md:pt-0">
+            <li class="mr-4 pt-6"><a  href="/archives.html">Archive</a></li>
+            <li class="mr-4 pt-6"><a                     href="/categories.html">Categories</a></li>
+            <li class="mr-4 pt-6"><a  href="/tags.html">Tags</a></li>
+            <li class="mr-4 pt-6"><a  href="/search.html">Search</a></li>
+            <li class="mr-4 pt-6"><a  href="https://me.ydnaz.id">About</a></li>
+        </ul>
+    </nav>
+    <div class="flex-grow md:max-w-screen-md md:mx-auto md:w-3/4 px-4">
+        <nav class="text-zinc-800 dark:text-zinc-300 mt-12 pb-2 md:mt-16" aria-label="Breadcrumb">
+            <ul class="p-0 inline-flex items-center">
+                <li class="flex items-center">
+                    <a href="/" class="text-zinc-800 dark:text-zinc-300 inline-flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
+                            </path>
+                        </svg>
+                        Home
+                    </a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+                <li class="flex items-center">
+                    <a href="/categories.html">Categories</a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+                <li class="flex items-center">
+                    <a href="/category/misc.html">misc</a>
+                    <svg class="fill-current w-3 h-3 mr-2 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                        <path
+                            d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z" />
+                    </svg>
+                </li>
+            </ul>
+        </nav>
+
+<main>
+  <header>
+    <h1 class="font-semibold text-3xl my-2">Use LVM-cache for  Storage Tiering to speed up spinning disk with small SSD.</h1>
+    <footer class="flex text-sm text-zinc-800 dark:text-zinc-400">
+      <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
+        <time>January 03, 2019</time>
+        <div>
+          <!--span>&nbsp;·&nbsp;{'minutes': 6} min read</span-->
+          <span><p style="text-align:right; color:#990000; ">&nbsp;·&nbsp;6 min read </p></span>
+        </div>
+        <div>
+          <span>&nbsp;·&nbsp;me</span>
+        </div>
+      </div>
+    </footer>
+    <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
+      <span>Last updated: July 23, 2023</span>
+    </div>
+  </header>
+  <div class="max-w-7xl container mx-auto my-8 text-zinc-800 dark:text-zinc-300  
+              prose lg:max-w-none prose-headings:text-zinc-800 prose-headings:dark:text-zinc-300 
+              prose-h1:text-3xl lg:prose-h1:text-3xl prose-headings:font-semibold 
+              prose-pre:bg-zinc-200 prose-pre:text-zinc-800
+              dark:prose-pre:bg-zinc-800 dark:prose-pre:text-zinc-200
+              prose-blockquote:text-zinc-800
+              dark:prose-blockquote:text-zinc-200
+              prose-a:text-slate-600 prose-a:font-normal
+              dark:prose-a:text-slate-400
+              dark:prose-strong:text-zinc-200 
+              dark:prose-code:text-zinc-200
+              dark:prose-code:bg-zinc-800
+              prose-code:bg-zinc-200
+              prose-code:font-light
+              prose-img:rounded-md
+              sm:text-left md:text-justify
+              ">
+    <p><strong><em>SSD VS HDD</em></strong><br/>
+SSD are much faster nand-flash based disk, but also more expensive and smaller in size comparing to the spinning hard-disk which come in bigger size and relatively cheaper but much slower.<br/>
+Futermore SSD also comes with <a href="https://blog.westerndigital.com/ssd-endurance-speeds-feeds-needs/">wear-out penalty</a>.</p>
+<p><strong><em>Hybrid Solution ?</em></strong><br/>
+In the market there are so-called "Hybrid HDD or SSHD" which use small in chip ssd as the cache for the HDD, but the size of ssd used in these product usually really small and furthermore you cannot tune the cache, nor you can get any statistics about the hits and missed cache.
+And nowdays in the modern day, there are much newer NVME interface which much faster compared to the old school SATA III port.
+So hardware hybrid solution like SSHD which utilize sata III interface no longer can compete against software solution which can use super fast nvme as the cache of the hdd.</p>
+<p><strong><em>What is LVM</em></strong><br/>
+What is LVM? LVM are the Logical Volume Manager tools which includes allocating disk, striping, mirror, resize, raid (utilize the mdadm) the logical volumes.<br/>
+With LVM a hard drive or set of hard drive allocated to be one or more physical volumes. LVM physical volume can be placed on another block devices which might span more disk.  </p>
+<p><strong><em>What is LVM-cache?</em></strong> <br/>
+Quotes from the man page </p>
+<blockquote>
+<p>The cache logical volume type uses a small and fast LV to improve the performance 
+of a large and slow LV. It does this by storing the frequently used blocks 
+on the faster LV. LVM refers to the small fast LV as a cache pool LV. 
+The large slow LV is called the origin LV. Due to requirements from dm-cache 
+(the kernel driver), LVM further splits the cache pool LV into two devices - the cache 
+data LV and cache metadata LV. The cache data LV is where copies of data blocks are 
+kept from the origin LV to increase speed. The cache metadata LV holds the accounting 
+information that specifies where data blocks are stored (e.g. on the origin LV or on 
+the cache data LV). Users should be familiar with these LVs if they wish to create 
+the best and most robust cached logical volumes. 
+All of these associated LVs must be in the same VG.</p>
+</blockquote>
+<p>So we can say LVM-cache is the technique to utilize the set of ssd which come in smaller size but much faster to improve the performance of much bigger size spinning hard-drive.  </p>
+<p><strong>Cache Implementation:</strong><br/>
+There are two available implementation technique of LVM-cache: 
+<ul>
+<li><strong><em>dm-cache</em></strong></li><br/>
+Provides both write and read-cache and is used where not only write operations are 
+critical but also read operations. 
+Benefit of dm-cache over dm-writecache is that the cache can be created, 
+activated and destroyed online. 
+<li><strong><em>dm-writecache</em></strong></li><br/>
+Provide only write cache, but no read cache. dm-writecache has less overhead 
+because there will be no promotion/demotion of data for read caches, 
+performance tests show slightly better results with dm-writecache over dm-cache. 
+Use cases are from my point of view a bit limited as there is no read cache. 
+If you need the maximum possible performance on write operations, 
+then dm-writecache is your choice. 
+Be aware that for creating the cache, the LV must be offline.
+</ul></p>
+<blockquote>
+<p>The initial of this blog-post is written in 2019, at the time of write, dm-writecache still not available on the Debian 9, Fedora 30 nor Redhat 8.0 Beta.
+And this post will focused on the <strong>dm-cache</strong>.</p>
+</blockquote>
+<p><strong>Cache Methods</strong><br/>
+Beside the cache technique, there are also two methods of how the cache utilized: 
+<ul>
+<li><strong><em>cachepool</em></strong></li>
+Cachepool use two logical volumes to store the cache and cache metadata. This methods had better throughput
+also if you have multiple volume to be cached, this method is better options.
+<li><strong><em>cache volumes</em></strong></li>
+Cache volume utilized single logical volume for both cache and cache metadata. This methods is easier to setup.
+</ul></p>
+<p><strong>Cache Mode:</strong><br/>
+<ul>
+<li><strong><em>Write-back</em></strong></li>
+In Write-back the write commit is done when the data is written to the cache device only. This mode provide better performance,
+but you may consider to use redundant cache device if it used on critical mission data, because if the cache device got lost 
+before it complete the write to the backing device, all of your <em>uncommited</em> data will be lost. 
+<li><strong><em>Write-through</em></strong></li>
+This cache mode is more secure, because the write will be commited if data already writen to the backing device, but also mean more or less useless. Because you  will not gain any write speed from the cache device.
+</ul></p>
+<p><strong><em>The test:</em></strong></p>
+<p>Assuming you already have the LVM setup on some harddiks, and we will use the <em>untouched</em> SSD for the cache device.</p>
+<div class="highlight"><pre><span></span><span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">pvcreate</span><span class="w"> </span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span>
+<span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">vgextend</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="w"> </span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span>
+<span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">lvcreate</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">meta</span><span class="w"> </span><span class="o">-</span><span class="n">L</span><span class="w"> </span><span class="n">XMB</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="w"> </span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span>
+<span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">lvcreate</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">-</span><span class="n">l</span><span class="w"> </span><span class="m">99</span>%<span class="n">PVS</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="w"> </span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span>
+<span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">lvconvert</span><span class="w"> </span><span class="o">--</span><span class="n">type</span><span class="w"> </span><span class="n">cache</span><span class="o">-</span><span class="n">pool</span><span class="w"> </span><span class="o">--</span><span class="n">cachemode</span><span class="w"> </span><span class="n">writeback</span><span class="w"> </span><span class="o">--</span><span class="n">poolmetadata</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="o">/</span><span class="n">meta</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="o">/</span><span class="n">cache</span>
+<span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">lvconvert</span><span class="w"> </span><span class="o">--</span><span class="n">type</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">--</span><span class="n">cachepool</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="o">/</span><span class="n">cache</span><span class="w"> </span><span class="n">MY_VOLGROUP</span><span class="o">/</span><span class="n">backed_lv</span>
+</pre></div>
+<p><strong>Things to notice:</strong>
+<li> /dev/sdX is your SSD device (e.g if it labeled as /dev/sdb use it instead, check your devices label with <code>lsblk</code> command</li>
+<li>MY_VOLGROUP is the name of your Volume Group Name</li>
+<li> XMB is the size of metadata cache, there is no official rules about this metadata size's on the documentation, it only stated the size should not less than 8MB. 
+In my machine I use the 128GB SSD as the cache device, so I will alocated 128MB for the metadata size</li>
+<li> 99%PVS is all available free size of my SSD will be used as the cache device, again there is no rule of thumbs about how big should the cache size. So it will be based on your workload and available cache-device <span>😀</span></li><br/>
+<li> backed_lv will be your logical volume to be cached</li></p>
+<p>After finished to setup the LVM cache, now it's time to rebuild the initramfs, so the LV cache module included in kernel.</p>
+<p>For Debian base install the <em>thin-provisioning-tools</em> package first</p>
+<div class="highlight"><pre><span></span><span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">apt</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="n">thin</span><span class="o">-</span><span class="n">provisioning</span><span class="o">-</span><span class="n">tools</span>
+</pre></div>
+<p>then copy this simple script into <em>/etc/initramfs-tools/hooks</em> and rebuild the initramfs</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">sudo</span><span class="w"> </span><span class="n">cat</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="n">EOF</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="sr">/etc/i</span><span class="n">nitramfs</span><span class="o">-</span><span class="n">tools</span><span class="sr">/hooks/</span><span class="n">lvmcache</span><span class="o">.</span><span class="n">sh</span>
+<span class="c1">#!/bin/sh</span>
+
+<span class="n">PREREQ</span><span class="o">=</span><span class="s">"lvm2"</span>
+
+<span class="n">prereqs</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">echo</span><span class="w"> </span><span class="s">"$PREREQ"</span>
+<span class="p">}</span>
+
+<span class="k">case</span><span class="w"> </span><span class="nv">$1</span><span class="w"> </span><span class="n">in</span>
+<span class="n">prereqs</span><span class="p">)</span>
+<span class="w">    </span><span class="n">prereqs</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="p">;;</span>
+<span class="n">esac</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="o">!</span><span class="w"> </span><span class="o">-</span><span class="n">x</span><span class="w"> </span><span class="sr">/usr/s</span><span class="n">bin</span><span class="o">/</span><span class="n">cache_check</span><span class="w"> </span><span class="p">];</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">fi</span>
+
+<span class="o">.</span><span class="w"> </span><span class="sr">/usr/s</span><span class="n">hare</span><span class="sr">/initramfs-tools/</span><span class="n">hook</span><span class="o">-</span><span class="n">functions</span>
+
+<span class="n">copy_exec</span><span class="w"> </span><span class="sr">/usr/s</span><span class="n">bin</span><span class="o">/</span><span class="n">cache_check</span>
+
+<span class="n">manual_add_modules</span><span class="w"> </span><span class="n">dm_cache</span><span class="w"> </span><span class="n">dm_cache_mq</span>
+
+<span class="n">EOF</span>
+
+<span class="nv">$</span><span class="w"> </span><span class="nv">sudo</span><span class="w"> </span><span class="nb">chmod</span><span class="w"> </span><span class="o">+</span><span class="n">x</span><span class="w"> </span><span class="sr">/etc/i</span><span class="n">nitramfs</span><span class="o">-</span><span class="n">tools</span><span class="sr">/hooks/</span><span class="n">lvmcache</span><span class="o">.</span><span class="n">sh</span>
+<span class="nv">$</span><span class="w"> </span><span class="nv">sudo</span><span class="w"> </span><span class="n">update</span><span class="o">-</span><span class="n">initramfs</span><span class="w"> </span><span class="o">-</span><span class="n">u</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="n">all</span>
+</pre></div>
+<p>For Fedora and RedHat Base:</p>
+<div class="highlight"><pre><span></span><span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">dracut</span><span class="w"> </span><span class="o">-</span><span class="n">v</span><span class="w"> </span><span class="o">-</span><span class="n">f</span>
+</pre></div>
+<p>That's all about the Storage Tiering with LVM cache, in the future maybe I'll post about the result and benchmark on another post. </p>
+<p>Refference:<br/>
+<a href="https://blog.delouw.ch/2020/01/29/using-lvm-cache-for-storage-tiering/">This nice post</a><br/>
+<a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/logical_volume_manager_administration/lvm_cache_volume_creation">should be</a><br/>
+<a href="https://support.mayfirst.org/wiki/lvm-cache">your refference</a></p>
+    <!-- <div class="aspect-w-16 aspect-h-9 mx-auto"></div> CSS placeholder -->
+  </div>
+  <footer class="flex flex-col mt-10 ">
+    <ul class="flex flex-wrap">
+    </ul>
+    <div class="flex w-full my-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
+      <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-l-lg">
+        <a class="flex flex-col pr-2" href="/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
+          <div class="mx-4 py-2 text-left">
+            <p class="text-zinc-600 dark:text-zinc-300 text-sm">« PREV PAGE</p>
+            <p class="text-left py-1 hover:underline">Install dan Setup Mariadb Cluster menggunakan Galera Cluster</p>
+          </div>
+        </a>
+      </div>
+      <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-r-lg ">
+        <a class="flex flex-col" href="/Bhyve the BSD Hypervisor.html">
+          <div class="text-right mx-4 py-2">
+            <p class="text-zinc-600 dark:text-zinc-300 text-sm">NEXT PAGE »</p>
+            <p class="text-right py-1 hover:underline">Berkenalan dengan Bhyve The BSD Hypervisor</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="flex bg-zinc-200 dark:bg-zinc-700 py-2 rounded-lg justify-center space-x-2 text-xs">
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="twitter" aria-label="share Features on twitter"
+            href="https://twitter.com/intent/tweet/?text=Features&amp;url=/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html">
+            <i class="fab fa-twitter fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="linkedin" aria-label="share Features on linkedin"
+            href="https://www.linkedin.com/sharing/share-offsite/?url=/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html">
+            <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="reddit" aria-label="share Features on reddit"
+            href="https://reddit.com/submit?url=/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html">
+            <i class="fab fa-reddit fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="facebook" aria-label="share Features on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html">
+            <i class="fab fa-facebook fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="whatsapp" aria-label="share Features on whatsapp"
+            href="https://api.whatsapp.com/send?text=Features - /use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html">
+            <i class="fab fa-whatsapp fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li class="bg-gray-900 p-1 text-white rounded-md">
+          <a target="_blank" rel="noopener noreferrer" title="telegram" aria-label="share Features on telegram"
+            href="https://telegram.me/share/url?text=Features&amp;url=/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html">
+            <i class="fab fa-telegram fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+  <div>
+  </div>
+</main>
+
+    </div>
+    <footer class="flex w-full text-xs justify-center mt-10 mb-6 text-zinc-600 dark:text-zinc-400">
+        <div class="px-4">
+            <span>©2015-2023&nbsp;&#8226;&nbsp;</span>Powered by Pelican &nbsp;& Papyrus
+        </div>
+    </footer>
+
+
+    <script>
+        let themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        let themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+        let themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', function () {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>blog-ydnaz - misc</title><link href="/" rel="alternate"></link><link href="/feeds/misc.atom.xml" rel="self"></link><id>/</id><updated>2020-06-30T22:30:00+07:00</updated><entry><title>Install dan Setup Mariadb Cluster menggunakan Galera Cluster</title><link href="/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html" rel="alternate"></link><published>2020-06-30T22:30:00+07:00</published><updated>2020-06-30T22:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2020-06-30:/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html</id><summary type="html">&lt;p&gt;Install dan konfigurasi Maridb Cluster&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;center&gt;&lt;img alt="mariadb galera" height="270" src="images/galera_cluster_logo.png" width="270"/&gt;&lt;/center&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>blog-ydnaz - misc</title><link href="/" rel="alternate"></link><link href="/feeds/misc.atom.xml" rel="self"></link><id>/</id><updated>2023-09-24T20:09:50+07:00</updated><entry><title>Podman Container</title><link href="/Podman,%20Linux,%20Container.html" rel="alternate"></link><published>2021-11-15T23:59:51+07:00</published><updated>2023-09-24T20:09:50+07:00</updated><author><name>me</name></author><id>tag:None,2021-11-15:/Podman, Linux, Container.html</id><summary type="html">&lt;p&gt;Podman Container an alternative container to docker and LXC&lt;/p&gt;</summary><content type="html">&lt;p&gt;Podman is the new platform technology from Redhat to manage, build and run container. It will compete with the already existed container in linux ecosystem like docker, lxc and systemd-nspawn.
+This project started back in 2018, with the aim to be more lightwieght, secure and also require no daemon to run the containers.
+With each release podman is more and more compatible toward docker, and as stated on the podman project's page, it is not inteded to replace the docker, but to be an alternative to docker. If you compared any container technology, docker is the closeted to docker to be used as an developer friendly container tools to isolate the application on its own, and also an kubernetes compatible.&lt;/p&gt;
+&lt;p&gt;Here is some key component of podman:&lt;br/&gt;
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Podman&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+Image and container image manager.
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Buildah&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+The container builder.
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Skopeo&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+A container image inspection manager.
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;runc&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+The container runner and feature builder for &lt;strong&gt;&lt;em&gt;podman&lt;/em&gt;&lt;/strong&gt; and &lt;strong&gt;&lt;em&gt;buildah&lt;/em&gt;&lt;/strong&gt;
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;crun&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt; 
+Additional runtime that allow greater contorl and security for rootless containers.  &lt;/p&gt;
+&lt;p&gt;Podman can be installed with default package manager on almost all linux variant without the need of external repositories, however old release distro will not get the latest version and it's new feature from the latest update.  &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;On Debian / Ubuntu based distro you can install podman with.&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo apt -y install podman podman-compose
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;On Fedora / Redhat / Centos / Alma / Rocky / Oracle linux.&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo yum -y install epel-release 
+&lt;span class="nv"&gt;$ &lt;/span&gt;sudo yum -y install container-tools
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;On Centos 7, the latest available version of podman is 1.16, you can build dan compile podman on your own from source if you want to use the newer version.
+&lt;strong&gt;&lt;em&gt;on Arch linux.&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo pacman -Syyu podman buildah fuse-overlaysfs cni-plugins
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Or add podman-docker packages if you want to use docker command to manage podman, 
+and for new version replace cni-plugins with netavark ( since version 4.x ).&lt;/p&gt;
+&lt;p&gt;To pull container with podman use this command:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;podman&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pull&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;docker&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;io&lt;/span&gt;&lt;span class="sr"&gt;/library/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To run grafana container, with container name grafana and expose port 3000 with podman use:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;podman&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;grafana&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;grafana&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;grafana&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In podman you can use shorted registery name like in the example above, or full registery name like this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;podman&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;grafana&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;docker&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;io&lt;/span&gt;&lt;span class="sr"&gt;/library/g&lt;/span&gt;&lt;span class="n"&gt;rafana&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;grafana&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For the latest version, podman currently support to build almost all Dockerfile and orchestrated container from docker-compose.yml file.
+To build from Dockerfile:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;podman&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;build&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tage&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To use podman for run container from compose file:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;podman&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/path/&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;compose&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;yml&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;up&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="misc"></category></entry><entry><title>Install dan Setup Mariadb Cluster menggunakan Galera Cluster</title><link href="/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html" rel="alternate"></link><published>2020-06-30T22:30:00+07:00</published><updated>2020-06-30T22:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2020-06-30:/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html</id><summary type="html">&lt;p&gt;Install dan konfigurasi Maridb Cluster&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;center&gt;&lt;img alt="mariadb galera" height="270" src="images/galera_cluster_logo.png" width="270"/&gt;&lt;/center&gt;
 &lt;strong&gt;&lt;em&gt;Introduction:&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Untuk membuat Clustering Database system di MariaDB maka bisa menggunakan Galera. 
 Galera sendiri sudah termasuk kedalam paket instalasi pada MariaDB sehingga tidak dibutuhkan instalasi paket tambahan.
@@ -193,22 +236,132 @@ Untuk opsi lainnya agar lebih jelas bisa di baca di &lt;a href="https://linux.di
 &lt;center&gt;&lt;img alt="haproxy stat" height="450" src="images/haproxy_stat.png" width="450"/&gt;&lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;Jika halaman stat sudah muncul, berarti haproxy sudah sukses untuk terhubung dengan galera cluster, dan sudah dapat digunakan untuk load balance galera cluster.
 Selanjutnya untuk menggunakan cluster ini maka kita akan mengakses melalui haproxy ini.&lt;/p&gt;
-&lt;p&gt;Sampai disini dulu tutorial nya.&lt;/p&gt;</content><category term="misc"></category><category term="Mariadb"></category><category term="linux"></category><category term="database"></category><category term="cluster"></category></entry><entry><title>Nginx RTMP Proxy</title><link href="/nginx-rtmp-proxy.html" rel="alternate"></link><published>2020-05-04T20:30:00+07:00</published><updated>2020-05-04T20:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2020-05-04:/nginx-rtmp-proxy.html</id><summary type="html">&lt;p&gt;Nginx for RTMP Proxy&lt;/p&gt;</summary><content type="html">&lt;p&gt;The company i'm currently working for usually held anual event for our customer. And with the hit of coronavirus that keep spreading, we're all force to do all of our things remotely from home.
-And we also decided to change the strategy of our anual meeting for our customer with online conference. 
-And for the streaming software we'll use the AntMedia Server as the straming backend that sits behind our network, and we want to use some proxy-ing tools for internet facing . 
-Initially we want to go with  apache or haproxy to be the proxy tools, but after some search and read this blog post &lt;a href="https://www.nginx.com/blog/tcp-load-balancing-udp-load-balancing-nginx-tips-tricks/"&gt;tcp and udp load balancing with nginx&lt;/a&gt; and &lt;a href="https://nginx-rtmp.blogspot.com/"&gt;nginx rtmp&lt;/a&gt;&lt;br/&gt;
-, we decide to try nginx.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Nginx TCP (Stream Module)&lt;/strong&gt;&lt;br/&gt;
-The configuration initially looks very straigh forward, but the module didn't including in nginx build by default. It's must be build manually with option &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;with&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;stream&lt;/span&gt;
+&lt;p&gt;Sampai disini dulu tutorial nya.&lt;/p&gt;</content><category term="misc"></category><category term="Mariadb"></category><category term="linux"></category><category term="database"></category><category term="cluster"></category></entry><entry><title>Use LVM-cache for Storage Tiering to speed up spinning disk with small SSD.</title><link href="/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html" rel="alternate"></link><published>2019-01-03T23:59:51+07:00</published><updated>2023-07-23T13:00:00+07:00</updated><author><name>me</name></author><id>tag:None,2019-01-03:/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html</id><summary type="html">&lt;p&gt;How to setup lvm-cache&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;strong&gt;&lt;em&gt;SSD VS HDD&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;
+SSD are much faster nand-flash based disk, but also more expensive and smaller in size comparing to the spinning hard-disk which come in bigger size and relatively cheaper but much slower.&lt;br/&gt;
+Futermore SSD also comes with &lt;a href="https://blog.westerndigital.com/ssd-endurance-speeds-feeds-needs/"&gt;wear-out penalty&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Hybrid Solution ?&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;
+In the market there are so-called "Hybrid HDD or SSHD" which use small in chip ssd as the cache for the HDD, but the size of ssd used in these product usually really small and furthermore you cannot tune the cache, nor you can get any statistics about the hits and missed cache.
+And nowdays in the modern day, there are much newer NVME interface which much faster compared to the old school SATA III port.
+So hardware hybrid solution like SSHD which utilize sata III interface no longer can compete against software solution which can use super fast nvme as the cache of the hdd.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;What is LVM&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;
+What is LVM? LVM are the Logical Volume Manager tools which includes allocating disk, striping, mirror, resize, raid (utilize the mdadm) the logical volumes.&lt;br/&gt;
+With LVM a hard drive or set of hard drive allocated to be one or more physical volumes. LVM physical volume can be placed on another block devices which might span more disk.  &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;What is LVM-cache?&lt;/em&gt;&lt;/strong&gt; &lt;br/&gt;
+Quotes from the man page &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The cache logical volume type uses a small and fast LV to improve the performance 
+of a large and slow LV. It does this by storing the frequently used blocks 
+on the faster LV. LVM refers to the small fast LV as a cache pool LV. 
+The large slow LV is called the origin LV. Due to requirements from dm-cache 
+(the kernel driver), LVM further splits the cache pool LV into two devices - the cache 
+data LV and cache metadata LV. The cache data LV is where copies of data blocks are 
+kept from the origin LV to increase speed. The cache metadata LV holds the accounting 
+information that specifies where data blocks are stored (e.g. on the origin LV or on 
+the cache data LV). Users should be familiar with these LVs if they wish to create 
+the best and most robust cached logical volumes. 
+All of these associated LVs must be in the same VG.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So we can say LVM-cache is the technique to utilize the set of ssd which come in smaller size but much faster to improve the performance of much bigger size spinning hard-drive.  &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cache Implementation:&lt;/strong&gt;&lt;br/&gt;
+There are two available implementation technique of LVM-cache: 
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;em&gt;dm-cache&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;br/&gt;
+Provides both write and read-cache and is used where not only write operations are 
+critical but also read operations. 
+Benefit of dm-cache over dm-writecache is that the cache can be created, 
+activated and destroyed online. 
+&lt;li&gt;&lt;strong&gt;&lt;em&gt;dm-writecache&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;br/&gt;
+Provide only write cache, but no read cache. dm-writecache has less overhead 
+because there will be no promotion/demotion of data for read caches, 
+performance tests show slightly better results with dm-writecache over dm-cache. 
+Use cases are from my point of view a bit limited as there is no read cache. 
+If you need the maximum possible performance on write operations, 
+then dm-writecache is your choice. 
+Be aware that for creating the cache, the LV must be offline.
+&lt;/ul&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The initial of this blog-post is written in 2019, at the time of write, dm-writecache still not available on the Debian 9, Fedora 30 nor Redhat 8.0 Beta.
+And this post will focused on the &lt;strong&gt;dm-cache&lt;/strong&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Cache Methods&lt;/strong&gt;&lt;br/&gt;
+Beside the cache technique, there are also two methods of how the cache utilized: 
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;em&gt;cachepool&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;
+Cachepool use two logical volumes to store the cache and cache metadata. This methods had better throughput
+also if you have multiple volume to be cached, this method is better options.
+&lt;li&gt;&lt;strong&gt;&lt;em&gt;cache volumes&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;
+Cache volume utilized single logical volume for both cache and cache metadata. This methods is easier to setup.
+&lt;/ul&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cache Mode:&lt;/strong&gt;&lt;br/&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;em&gt;Write-back&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;
+In Write-back the write commit is done when the data is written to the cache device only. This mode provide better performance,
+but you may consider to use redundant cache device if it used on critical mission data, because if the cache device got lost 
+before it complete the write to the backing device, all of your &lt;em&gt;uncommited&lt;/em&gt; data will be lost. 
+&lt;li&gt;&lt;strong&gt;&lt;em&gt;Write-through&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;
+This cache mode is more secure, because the write will be commited if data already writen to the backing device, but also mean more or less useless. Because you  will not gain any write speed from the cache device.
+&lt;/ul&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;The test:&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Assuming you already have the LVM setup on some harddiks, and we will use the &lt;em&gt;untouched&lt;/em&gt; SSD for the cache device.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pvcreate&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;dev&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sdX&lt;/span&gt;
+&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vgextend&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;dev&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sdX&lt;/span&gt;
+&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;lvcreate&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;meta&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;XMB&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;dev&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sdX&lt;/span&gt;
+&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;lvcreate&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;99&lt;/span&gt;%&lt;span class="n"&gt;PVS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;dev&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sdX&lt;/span&gt;
+&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;lvconvert&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;pool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;cachemode&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;writeback&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;poolmetadata&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;meta&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;
+&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;lvconvert&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;cachepool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MY_VOLGROUP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;backed_lv&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;when you configure nginx.&lt;/p&gt;
-&lt;p&gt;With that module you can use nginx as TCP Proxy, and nginx now can be use as the proxy for any TCP and UDP.&lt;/p&gt;
-&lt;p&gt;And later on we also found that in nginx plus, they build some module that not only make use of nginx as TCP proxy, buat also specifically as the RTMP proxy. And for the opensource version we can use this module
-&lt;a href="https://github.com/arut/nginx-rtmp-module.git"&gt;nginx-ts-module&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;If you use Debian based and wan't to use pre-compiled module you can use the library&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;libnginx&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rtmp&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</content><category term="misc"></category><category term="nginx"></category><category term="linux"></category><category term="proxy"></category><category term="tcp"></category><category term="rtmp"></category></entry><entry><title>Apa itu Cluster?</title><link href="/apa-itu-cluster.html" rel="alternate"></link><published>2014-06-10T13:30:00+07:00</published><updated>2014-06-10T13:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2014-06-10:/apa-itu-cluster.html</id><summary type="html">&lt;p&gt;Mengenal apa itu Clustering system&lt;/p&gt;</summary><content type="html">&lt;p&gt;Apa itu Cluster?&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Things to notice:&lt;/strong&gt;
+&lt;li&gt; /dev/sdX is your SSD device (e.g if it labeled as /dev/sdb use it instead, check your devices label with &lt;code&gt;lsblk&lt;/code&gt; command&lt;/li&gt;
+&lt;li&gt;MY_VOLGROUP is the name of your Volume Group Name&lt;/li&gt;
+&lt;li&gt; XMB is the size of metadata cache, there is no official rules about this metadata size's on the documentation, it only stated the size should not less than 8MB. 
+In my machine I use the 128GB SSD as the cache device, so I will alocated 128MB for the metadata size&lt;/li&gt;
+&lt;li&gt; 99%PVS is all available free size of my SSD will be used as the cache device, again there is no rule of thumbs about how big should the cache size. So it will be based on your workload and available cache-device &lt;span&gt;😀&lt;/span&gt;&lt;/li&gt;&lt;br/&gt;
+&lt;li&gt; backed_lv will be your logical volume to be cached&lt;/li&gt;&lt;/p&gt;
+&lt;p&gt;After finished to setup the LVM cache, now it's time to rebuild the initramfs, so the LV cache module included in kernel.&lt;/p&gt;
+&lt;p&gt;For Debian base install the &lt;em&gt;thin-provisioning-tools&lt;/em&gt; package first&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;thin&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;provisioning&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;tools&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;then copy this simple script into &lt;em&gt;/etc/initramfs-tools/hooks&lt;/em&gt; and rebuild the initramfs&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cat&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/etc/i&lt;/span&gt;&lt;span class="n"&gt;nitramfs&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;tools&lt;/span&gt;&lt;span class="sr"&gt;/hooks/&lt;/span&gt;&lt;span class="n"&gt;lvmcache&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;
+&lt;span class="c1"&gt;#!/bin/sh&lt;/span&gt;
+
+&lt;span class="n"&gt;PREREQ&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"lvm2"&lt;/span&gt;
+
+&lt;span class="n"&gt;prereqs&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"$PREREQ"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;case&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;in&lt;/span&gt;
+&lt;span class="n"&gt;prereqs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;prereqs&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;exit&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;;;&lt;/span&gt;
+&lt;span class="n"&gt;esac&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/usr/s&lt;/span&gt;&lt;span class="n"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cache_check&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;exit&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;fi&lt;/span&gt;
+
+&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/usr/s&lt;/span&gt;&lt;span class="n"&gt;hare&lt;/span&gt;&lt;span class="sr"&gt;/initramfs-tools/&lt;/span&gt;&lt;span class="n"&gt;hook&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;functions&lt;/span&gt;
+
+&lt;span class="n"&gt;copy_exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/usr/s&lt;/span&gt;&lt;span class="n"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cache_check&lt;/span&gt;
+
+&lt;span class="n"&gt;manual_add_modules&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;dm_cache&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;dm_cache_mq&lt;/span&gt;
+
+&lt;span class="n"&gt;EOF&lt;/span&gt;
+
+&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;chmod&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="sr"&gt;/etc/i&lt;/span&gt;&lt;span class="n"&gt;nitramfs&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;tools&lt;/span&gt;&lt;span class="sr"&gt;/hooks/&lt;/span&gt;&lt;span class="n"&gt;lvmcache&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;
+&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;update&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;initramfs&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;all&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For Fedora and RedHat Base:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;dracut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That's all about the Storage Tiering with LVM cache, in the future maybe I'll post about the result and benchmark on another post. &lt;/p&gt;
+&lt;p&gt;Refference:&lt;br/&gt;
+&lt;a href="https://blog.delouw.ch/2020/01/29/using-lvm-cache-for-storage-tiering/"&gt;This nice post&lt;/a&gt;&lt;br/&gt;
+&lt;a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/logical_volume_manager_administration/lvm_cache_volume_creation"&gt;should be&lt;/a&gt;&lt;br/&gt;
+&lt;a href="https://support.mayfirst.org/wiki/lvm-cache"&gt;your refference&lt;/a&gt;&lt;/p&gt;</content><category term="misc"></category></entry><entry><title>Apa itu Cluster?</title><link href="/apa-itu-cluster.html" rel="alternate"></link><published>2014-06-10T13:30:00+07:00</published><updated>2014-06-10T13:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2014-06-10:/apa-itu-cluster.html</id><summary type="html">&lt;p&gt;Mengenal apa itu Clustering system&lt;/p&gt;</summary><content type="html">&lt;p&gt;Apa itu Cluster?&lt;/p&gt;
 &lt;p&gt;&lt;img alt="cluster img!" src="images/cluster-img2.png" title="cluster2.img"/&gt;&lt;/p&gt;
 &lt;p&gt;Teknik Clustering di dalam system komputer adalah teknik menggabungkan beberapa server atau instance menjadi sebuah resource system yang bisa digunakan untuk berbagai keperluan.
 Clustering pada system komputer sendiri bisa merupakan Hardware Cluster maupun Software Cluster.&lt;/p&gt;

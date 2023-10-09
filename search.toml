@@ -1,11 +1,16 @@
 [input]
 html_selector = "main"
-base_directory = "output"
+base_directory = "/homestore1/smbshare/Andi/blog-ydnaz/output"
 
 [[input.files]]
 path = "Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html"
 url = "/Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html"
 title = "OpenTofu"
+
+[[input.files]]
+path = "Podman, Linux, Container.html"
+url = "/Podman, Linux, Container.html"
+title = "Podman Container"
 
 [[input.files]]
 path = "Volume Storage management di Windows.html"
@@ -18,9 +23,9 @@ url = "/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html"
 title = "Install dan Setup Mariadb Cluster menggunakan Galera Cluster"
 
 [[input.files]]
-path = "nginx-rtmp-proxy.html"
-url = "/nginx-rtmp-proxy.html"
-title = "Nginx RTMP Proxy"
+path = "use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html"
+url = "/use-lvm-cache-for-storage-tiering-to-speed-up-spinning-disk-with-small-ssd.html"
+title = "Use LVM-cache for Storage Tiering to speed up spinning disk with small SSD."
 
 [[input.files]]
 path = "Bhyve the BSD Hypervisor.html"

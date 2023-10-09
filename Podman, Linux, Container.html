@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content="Pelican" />
     <meta name="description" content="blog-ydnaz Blog Posts">
-    <title>Nginx RTMP Proxy</title>
+    <title>Podman Container</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
     <link rel="stylesheet" type="text/css" href="/theme/css/main.css" />
@@ -18,7 +18,7 @@
     <link
         href="/feeds/all.atom.xml"
         type="application/atom+xml" rel="alternate" title="blog-ydnaz Atom Feed" />
-<meta name="description" content="Nginx for RTMP Proxy" />
+<meta name="description" content="Podman Container an alternative container to docker and LXC" />
 </head>
 
 <body class="min-h-screen flex flex-col max-w-7xl lg:max-w-none text-zinc-800 bg-neutral-100 
@@ -95,10 +95,10 @@
 
 <main>
   <header>
-    <h1 class="font-semibold text-3xl my-2">Nginx RTMP Proxy</h1>
+    <h1 class="font-semibold text-3xl my-2">Podman Container</h1>
     <footer class="flex text-sm text-zinc-800 dark:text-zinc-400">
       <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
-        <time>May 04, 2020</time>
+        <time>November 15, 2021</time>
         <div>
           <!--span>&nbsp;·&nbsp;{'minutes': 2} min read</span-->
           <span><p style="text-align:right; color:#990000; ">&nbsp;·&nbsp;2 min read </p></span>
@@ -108,6 +108,9 @@
         </div>
       </div>
     </footer>
+    <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
+      <span>Last updated: September 24, 2023</span>
+    </div>
   </header>
   <div class="max-w-7xl container mx-auto my-8 text-zinc-800 dark:text-zinc-300  
               prose lg:max-w-none prose-headings:text-zinc-800 prose-headings:dark:text-zinc-300 
@@ -126,61 +129,69 @@
               prose-img:rounded-md
               sm:text-left md:text-justify
               ">
-    <p>The company i'm currently working for usually held anual event for our customer. And with the hit of coronavirus that keep spreading, we're all force to do all of our things remotely from home.
-And we also decided to change the strategy of our anual meeting for our customer with online conference. 
-And for the streaming software we'll use the AntMedia Server as the straming backend that sits behind our network, and we want to use some proxy-ing tools for internet facing . 
-Initially we want to go with  apache or haproxy to be the proxy tools, but after some search and read this blog post <a href="https://www.nginx.com/blog/tcp-load-balancing-udp-load-balancing-nginx-tips-tricks/">tcp and udp load balancing with nginx</a> and <a href="https://nginx-rtmp.blogspot.com/">nginx rtmp</a><br/>
-, we decide to try nginx.</p>
-<p><strong>Nginx TCP (Stream Module)</strong><br/>
-The configuration initially looks very straigh forward, but the module didn't including in nginx build by default. It's must be build manually with option </p>
-<div class="highlight"><pre><span></span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">stream</span>
+    <p>Podman is the new platform technology from Redhat to manage, build and run container. It will compete with the already existed container in linux ecosystem like docker, lxc and systemd-nspawn.
+This project started back in 2018, with the aim to be more lightwieght, secure and also require no daemon to run the containers.
+With each release podman is more and more compatible toward docker, and as stated on the podman project's page, it is not inteded to replace the docker, but to be an alternative to docker. If you compared any container technology, docker is the closeted to docker to be used as an developer friendly container tools to isolate the application on its own, and also an kubernetes compatible.</p>
+<p>Here is some key component of podman:<br/>
+<li> <strong><em>Podman</em></strong> </li>
+Image and container image manager.
+<li> <strong><em>Buildah</em></strong> </li>
+The container builder.
+<li> <strong><em>Skopeo</em></strong> </li>
+A container image inspection manager.
+<li> <strong><em>runc</em></strong> </li>
+The container runner and feature builder for <strong><em>podman</em></strong> and <strong><em>buildah</em></strong>
+<li> <strong><em>crun</em></strong> </li> 
+Additional runtime that allow greater contorl and security for rootless containers.  </p>
+<p>Podman can be installed with default package manager on almost all linux variant without the need of external repositories, however old release distro will not get the latest version and it's new feature from the latest update.  </p>
+<p><strong><em>On Debian / Ubuntu based distro you can install podman with.</em></strong></p>
+<div class="highlight"><pre><span></span><span class="nv">$ </span>sudo apt -y install podman podman-compose
 </pre></div>
-<p>when you configure nginx.</p>
-<p>With that module you can use nginx as TCP Proxy, and nginx now can be use as the proxy for any TCP and UDP.</p>
-<p>And later on we also found that in nginx plus, they build some module that not only make use of nginx as TCP proxy, buat also specifically as the RTMP proxy. And for the opensource version we can use this module
-<a href="https://github.com/arut/nginx-rtmp-module.git">nginx-ts-module</a></p>
-<p>If you use Debian based and wan't to use pre-compiled module you can use the library</p>
-<div class="highlight"><pre><span></span><span class="n">libnginx</span><span class="o">-</span><span class="n">mod</span><span class="o">-</span><span class="n">rtmp</span>
+<p><strong><em>On Fedora / Redhat / Centos / Alma / Rocky / Oracle linux.</em></strong></p>
+<div class="highlight"><pre><span></span><span class="nv">$ </span>sudo yum -y install epel-release 
+<span class="nv">$ </span>sudo yum -y install container-tools
+</pre></div>
+<p>On Centos 7, the latest available version of podman is 1.16, you can build dan compile podman on your own from source if you want to use the newer version.
+<strong><em>on Arch linux.</em></strong></p>
+<div class="highlight"><pre><span></span><span class="nv">$ </span>sudo pacman -Syyu podman buildah fuse-overlaysfs cni-plugins
+</pre></div>
+<p>Or add podman-docker packages if you want to use docker command to manage podman, 
+and for new version replace cni-plugins with netavark ( since version 4.x ).</p>
+<p>To pull container with podman use this command:</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">podman</span><span class="w"> </span><span class="n">pull</span><span class="w"> </span><span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="sr">/library/</span><span class="n">nginx</span>
+</pre></div>
+<p>To run grafana container, with container name grafana and expose port 3000 with podman use:</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">podman</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">--</span><span class="n">name</span><span class="w"> </span><span class="n">grafana</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="mi">3000</span><span class="p">:</span><span class="mi">3000</span><span class="w"> </span><span class="n">grafana</span><span class="o">/</span><span class="n">grafana</span>
+</pre></div>
+<p>In podman you can use shorted registery name like in the example above, or full registery name like this</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">podman</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">--</span><span class="n">name</span><span class="w"> </span><span class="n">grafana</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="mi">3000</span><span class="p">:</span><span class="mi">3000</span><span class="w"> </span><span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="sr">/library/g</span><span class="n">rafana</span><span class="o">/</span><span class="n">grafana</span>
+</pre></div>
+<p>For the latest version, podman currently support to build almost all Dockerfile and orchestrated container from docker-compose.yml file.
+To build from Dockerfile:</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">podman</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">-</span><span class="n">t</span><span class="w"> </span><span class="n">tage</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="o">.</span>
+</pre></div>
+<p>To use podman for run container from compose file:</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">podman</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="sr">/path/</span><span class="n">to</span><span class="o">/</span><span class="n">compose</span><span class="o">.</span><span class="n">yml</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">-</span><span class="n">d</span>
 </pre></div>
     <!-- <div class="aspect-w-16 aspect-h-9 mx-auto"></div> CSS placeholder -->
   </div>
   <footer class="flex flex-col mt-10 ">
     <ul class="flex flex-wrap">
-        <li
-          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
-          <a href="/tag/linux.html">linux</a>
-        </li>
-        <li
-          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
-          <a href="/tag/nginx.html">nginx</a>
-        </li>
-        <li
-          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
-          <a href="/tag/proxy.html">proxy</a>
-        </li>
-        <li
-          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
-          <a href="/tag/rtmp.html">rtmp</a>
-        </li>
-        <li
-          class="bg-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 mb-2 mr-2 px-3 py-1.5 rounded-md transition ease-in active:-translate-y-1 active:scale-110 duration-75">
-          <a href="/tag/tcp.html">tcp</a>
-        </li>
     </ul>
     <div class="flex w-full my-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
       <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-l-lg">
-        <a class="flex flex-col pr-2" href="/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
+        <a class="flex flex-col pr-2" href="/Perbuahan lisensi di hashicorp membuat OpenTofu lahir sebagai fork..html">
           <div class="mx-4 py-2 text-left">
             <p class="text-zinc-600 dark:text-zinc-300 text-sm">« PREV PAGE</p>
-            <p class="text-left py-1 hover:underline">Install dan Setup Mariadb Cluster menggunakan Galera Cluster</p>
+            <p class="text-left py-1 hover:underline">OpenTofu</p>
           </div>
         </a>
       </div>
       <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-r-lg ">
-        <a class="flex flex-col" href="/Bhyve the BSD Hypervisor.html">
+        <a class="flex flex-col" href="/Volume Storage management di Windows.html">
           <div class="text-right mx-4 py-2">
             <p class="text-zinc-600 dark:text-zinc-300 text-sm">NEXT PAGE »</p>
-            <p class="text-right py-1 hover:underline">Berkenalan dengan Bhyve The BSD Hypervisor</p>
+            <p class="text-right py-1 hover:underline">Microsoft Storage Space</p>
           </div>
         </a>
       </div>
@@ -189,7 +200,7 @@ The configuration initially looks very straigh forward, but the module didn't in
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="twitter" aria-label="share Features on twitter"
-            href="https://twitter.com/intent/tweet/?text=Features&amp;url=/nginx-rtmp-proxy.html">
+            href="https://twitter.com/intent/tweet/?text=Features&amp;url=/Podman, Linux, Container.html">
             <i class="fab fa-twitter fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -197,7 +208,7 @@ The configuration initially looks very straigh forward, but the module didn't in
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="linkedin" aria-label="share Features on linkedin"
-            href="https://www.linkedin.com/sharing/share-offsite/?url=/nginx-rtmp-proxy.html">
+            href="https://www.linkedin.com/sharing/share-offsite/?url=/Podman, Linux, Container.html">
             <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -205,7 +216,7 @@ The configuration initially looks very straigh forward, but the module didn't in
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="reddit" aria-label="share Features on reddit"
-            href="https://reddit.com/submit?url=/nginx-rtmp-proxy.html">
+            href="https://reddit.com/submit?url=/Podman, Linux, Container.html">
             <i class="fab fa-reddit fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -213,7 +224,7 @@ The configuration initially looks very straigh forward, but the module didn't in
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="facebook" aria-label="share Features on facebook"
-            href="https://facebook.com/sharer/sharer.php?u=/nginx-rtmp-proxy.html">
+            href="https://facebook.com/sharer/sharer.php?u=/Podman, Linux, Container.html">
             <i class="fab fa-facebook fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -221,7 +232,7 @@ The configuration initially looks very straigh forward, but the module didn't in
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="whatsapp" aria-label="share Features on whatsapp"
-            href="https://api.whatsapp.com/send?text=Features - /nginx-rtmp-proxy.html">
+            href="https://api.whatsapp.com/send?text=Features - /Podman, Linux, Container.html">
             <i class="fab fa-whatsapp fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -229,7 +240,7 @@ The configuration initially looks very straigh forward, but the module didn't in
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="telegram" aria-label="share Features on telegram"
-            href="https://telegram.me/share/url?text=Features&amp;url=/nginx-rtmp-proxy.html">
+            href="https://telegram.me/share/url?text=Features&amp;url=/Podman, Linux, Container.html">
             <i class="fab fa-telegram fa-2x" aria-hidden="true"></i>
           </a>
         </li>
