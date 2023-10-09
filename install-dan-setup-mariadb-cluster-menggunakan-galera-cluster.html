@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content="Pelican" />
     <meta name="description" content="blog-ydnaz Blog Posts">
-    <title>Membangun Cluster di Mariadb menggunakan Galera Cluster part 1</title>
+    <title>Install dan Setup Mariadb Cluster menggunakan Galera Cluster</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
     <link rel="stylesheet" type="text/css" href="/theme/css/main.css" />
@@ -53,6 +53,7 @@
             <li class="mr-4 pt-6"><a                     href="/categories.html">Categories</a></li>
             <li class="mr-4 pt-6"><a  href="/tags.html">Tags</a></li>
             <li class="mr-4 pt-6"><a  href="/search.html">Search</a></li>
+            <li class="mr-4 pt-6"><a  href="https://me.ydnaz.id">About</a></li>
         </ul>
     </nav>
     <div class="flex-grow md:max-w-screen-md md:mx-auto md:w-3/4 px-4">
@@ -94,12 +95,13 @@
 
 <main>
   <header>
-    <h1 class="font-semibold text-3xl my-2">Membangun Cluster di Mariadb menggunakan Galera Cluster part 1</h1>
+    <h1 class="font-semibold text-3xl my-2">Install dan Setup Mariadb Cluster menggunakan Galera Cluster</h1>
     <footer class="flex text-sm text-zinc-800 dark:text-zinc-400">
       <div class="flex text-xs text-zinc-800 dark:text-zinc-400">
         <time>June 30, 2020</time>
         <div>
-          <span>&nbsp;·&nbsp;{'minutes': 5} min read</span>
+          <!--span>&nbsp;·&nbsp;{'minutes': 7} min read</span-->
+          <span><p style="text-align:right; color:#990000; ">&nbsp;·&nbsp;7 min read </p></span>
         </div>
         <div>
           <span>&nbsp;·&nbsp;me</span>
@@ -124,41 +126,45 @@
               prose-img:rounded-md
               sm:text-left md:text-justify
               ">
-    <p><strong><em>Introduction:</em></strong></p>
+    <p><center><img alt="mariadb galera" height="270" src="images/galera_cluster_logo.png" width="270"/></center>
+<strong><em>Introduction:</em></strong></p>
 <p>Untuk membuat Clustering Database system di MariaDB maka bisa menggunakan Galera. 
 Galera sendiri sudah termasuk kedalam paket instalasi pada MariaDB sehingga tidak dibutuhkan instalasi paket tambahan.
 Namun jika ingin menggunakan versi galera yang lebih tinggi seperti galera-3 di MariaDB 10.3 dan 
 galera-4 di MariaDB 10.4 maka butuh menambahlak paket <em>galera-3</em> dan <em>galera-4</em> untuk menginstall 
-wsrep provider librarynya.</p>
-<p>Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:</p>
+wsrep provider librarynya.
+<center><img alt="db load-balance" height="300" src="images/db-loadbalance.png" width="300"/></center>
+Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:
 <ul>
-<li><strong><em>True Multi-Master</em></strong> 
+<li> <strong><em>True Multi-Master</em></strong> </li>
 You can read and write to any node at any time. 
-Changes to data on one node will be replicated on all. </li>
-<li><strong><em>Synchronous Replication</em></strong> 
-There is no slave lag, so no data is lost if a node crashes.</li>
-<li><strong><em>Tightly Coupled</em></strong> 
-All nodes hold the same state. There is no diverged data between nodes. </li>
-<li><strong><em>Multi-Threaded Slave</em></strong> 
-This allows for better performance and for any workload. </li>
-<li><strong><em>No Master-Slave Failover</em></strong> 
-There is no need for master-slave operations or to use VIP. </li>
-<li><strong><em>Hot Standby</em></strong> 
+Changes to data on one node will be replicated on all. 
+<li> <strong><em>Synchronous Replication</em></strong> </li>
+There is no slave lag, so no data is lost if a node crashes.
+<li> <strong><em>Tightly Coupled</em></strong> </li>
+All nodes hold the same state. There is no diverged data between nodes. 
+<li> <strong><em>Multi-Threaded Slave</em></strong> </li>
+This allows for better performance and for any workload. 
+<li> <strong><em>No Master-Slave Failover</em></strong> </li>
+There is no need for master-slave operations or to use VIP. 
+<li> <strong><em>Hot Standby</em></strong> </li>
 There is no downtime related to failures or intentionally taking down a node 
-for maintenance, since there is no failover. </li>
-<li><strong><em>Automatic Node Provisioning</em></strong> 
-There&rsquo;s no need to backup manually the database and copy it to the new node. </li>
-<li><strong><em>Supports InnoDB</em></strong> 
-The InnoDB storage engine provides for transactional tables. </li>
-<li><strong><em>Transparent to Applications</em></strong> 
+for maintenance, since there is no failover. 
+<li> <strong><em>Automatic Node Provisioning</em></strong> </li>
+There&rsquo;s no need to backup manually the database and copy it to the new node. 
+<li> <strong><em>Supports InnoDB</em></strong> </li>
+The InnoDB storage engine provides for transactional tables. 
+<li> <strong><em>Transparent to Applications</em></strong> </li>
 Generally, you won&rsquo;t have to change an application that will interface with the database
- as a result of Galera. If you do, it will be minimal changes. </li>
-<li><strong><em>No Read and Write Splitting Needed</em></strong> 
-There is no need to split read and write queries.</li>
-</ul>
-<p>Pada tutorial ini instalasi di lakukan di OS Ubuntu 20.04, tutorial ini harusnya bisa juga di implementasikan di Debian 10 dan turunannya.</p>
-<p><strong><em>Requirements:</em></strong></p>
-<p>3 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance database server.
+ as a result of Galera. If you do, it will be minimal changes. 
+<li> <strong><em>No Read and Write Splitting Needed</em></strong> </li>
+There is no need to split read and write queries.
+</ul></p>
+<p><strong>Disclaimer:</strong><br/>
+<span style="background-color: #FF9333"> <strong><em>Tutorial instalasi ini di test di Ubuntu 20.04, 22.04 dan Debian 10, 11. Untuk distro lainnya atau varian lainnya silahkan di test sendiri (DWYOR).</em></strong></span><br/>
+:grin::grin:</p>
+<p><strong><em>Requirements:</em></strong><br/>
+3 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance database server.
 1 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance proxy server.
 (optional) server bisa saling terhubung menggunakan hostname</p>
 <p>Server yang digunakan:</p>
@@ -167,8 +173,8 @@ There is no need to split read and write queries.</li>
 <span class="x">192.168.30.64   db3</span>
 <span class="x">192.168.30.200  proxy</span>
 </pre></div>
-<p><strong><em>Proses Instalasi:</em></strong></p>
-<p>Seperti biasa lakukan update terlebih dahulu sebelum menginstall paket.</p>
+<p><strong><em>Proses Instalasi:</em></strong><br/>
+Seperti biasa lakukan update terlebih dahulu sebelum menginstall paket.</p>
 <div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">update</span>
 <span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">apt</span><span class="w"> </span><span class="o">-</span><span class="nx">y</span><span class="w"> </span><span class="nx">install</span><span class="w"> </span><span class="nx">mariadb</span><span class="o">-</span><span class="nx">server</span><span class="w"> </span><span class="nx">rsync</span>
 </pre></div>
@@ -193,7 +199,7 @@ Selanjutnya keluar dari mariadb dengan perintah </p>
 <p>Setlah itu kita akan melakukan config Galera, sebelum itu matikan terlebih dahulu servicenya.</p>
 <div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">systemctl</span><span class="w"> </span><span class="nx">stop</span><span class="w"> </span><span class="nx">mariadb</span>
 </pre></div>
-<p><strong><em>Setup Galera cluster</em></strong></p>
+<p><strong><em>Setup Galera cluster</em></strong> </p>
 <p>Konfigurasi Galera cluster ada di <code>/etc/mysql/mariadb.conf.d/50-galera.cnf</code>
 Edit file tersebut dan tambahkan config seperti berikut:
 <code>$ sudo vim /etc/mysql/mariadb.conf.d/50-galera.cnf</code></p>
@@ -223,8 +229,8 @@ Edit file tersebut dan tambahkan config seperti berikut:
 <span class="x">wsrep_node_name=</span>
 </pre></div>
 <p>ganti dengan hostname dan ip dari masing-masing server. </p>
-<p><strong><em>Firwall Config (Optional)</em></strong>
-Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, namun untuk production sangat disarankan agar service tersebut dinyalakan. Untuk management firewall di Debian Base bisa menggunakan UFW ataupun Firewalld seperti di keluarga <strong>RedHat</strong>, namun agar lebih seragam maka tutorial ini akan menggunakan UFW sebagai manajemen firewallnya.</p>
+<p><strong><em>Firwall Config (Optional)</em></strong> </p>
+<p>Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, namun untuk production sangat disarankan agar service tersebut dinyalakan. Untuk management firewall di Debian Base bisa menggunakan UFW ataupun Firewalld seperti di keluarga <strong>RedHat</strong>, namun agar lebih seragam maka tutorial ini akan menggunakan UFW sebagai manajemen firewallnya.</p>
 <p>Port yang perlu di buka agar service-service yang dibutuhkan untuk Galera Cluster bisa berfungsi:</p>
 <ul>
 <li><strong>3306</strong> Port yang digunakan untuk MySQL/MariaDB Database berkomunikasi, merupakan default service port (meskipun port ini bisa diubah tetapi tidak direkomendasikan untuk mengubahnya).</li>
@@ -240,20 +246,80 @@ Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, n
 <div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">ufw</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="mi">3306</span><span class="p">,</span><span class="mi">4567</span><span class="p">,</span><span class="mi">4568</span><span class="p">,</span><span class="mi">4444</span><span class="o">/</span><span class="nx">tcp</span>
 <span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">ufw</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="mi">4567</span><span class="o">/</span><span class="nx">udp</span>
 </pre></div>
-<p><strong><em>Start Galera Cluster</em></strong>
-Selanjutnya start Galera Cluster dari node pertama</p>
+<p><strong><em>Start Galera Cluster</em></strong> </p>
+<p>Selanjutnya start Galera Cluster dari node pertama</p>
 <div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">galera_new_cluster</span>
 </pre></div>
 <p>Selanjutnya cek status wsrep dengan login ke mysql shell</p>
 <div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">mysql</span><span class="w"> </span><span class="o">-</span><span class="nx">u</span><span class="w"> </span><span class="nx">root</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="o">-</span><span class="nx">e</span><span class="w"> </span><span class="s">"SHOW STATUS LIKE 'wsrep_cluster_size'"</span>
 </pre></div>
 <p>Jika sukses maka akan muncul tampilan berikut:</p>
+<p><img alt="wsrep status " src="images/wsrep-img1.png"/> </p>
 <p>Selanjutnya start service mariadb-server di node 2 dan 3</p>
 <div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">systemctl</span><span class="w"> </span><span class="nx">start</span><span class="w"> </span><span class="nx">mysql</span>
 </pre></div>
-<p>dan cek kembali wsrep status nya, jika server db node 2 dan 3 juga sukses, maka ukuran <strong>wsrep_cluster_size</strong> nya akan bertambah seperti gambar berikut:</p>
-<p>Sampai disini dulu tutorial <strong>part 1</strong> ini, untuk testing replication akan kita sambung di part berikutnya.<br/>
-😁 😁 😁</p>
+<p>dan cek kembali wsrep status nya, jika server db node 2 dan 3 juga sukses, maka ukuran <strong>wsrep_cluster_size</strong> nya akan bertambah seperti gambar berikut:
+<img alt="wsrep_status_node2 " src="images/wsrep-imgdb2.png"/> <img alt="wsrep_status_node3 " src="images/wsrep-img3.png"/></p>
+<p><strong><em>Setup Load Balance</em></strong> </p>
+<p>Setelah selesai setup cluster selanjutnya kita akan setting <em>load balancing</em> untuk galera cluster ini. Tujuan load balance adalah untuk memastikan bahwa load terbagi dengan rata
+antar semua server. Untuk load balance-nya kita bisa menggunakan haproxy, nginx maupun tools load balance lainnya.
+Disini kita akan menggunakan Haproxy sebagai load-balancer server. Untuk menginstall haproxy di ubuntu atau debian jalankan perinta berikut:</p>
+<div class="highlight"><pre><span></span><span class="err">$</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">haproxy</span>
+</pre></div>
+<p>Selanjutnya setup haproxy, sebaiknya kita copy terlebih dahulu default confignya.</p>
+<div class="highlight"><pre><span></span><span class="err">$</span><span class="w"> </span><span class="nx">sudo</span><span class="w"> </span><span class="nx">cp</span><span class="w"> </span><span class="o">/</span><span class="nx">etc</span><span class="o">/</span><span class="nx">haproxy</span><span class="o">/</span><span class="nx">haproxy</span><span class="p">.</span><span class="nx">cfg</span><span class="w"> </span><span class="o">/</span><span class="nx">etc</span><span class="o">/</span><span class="nx">haproxy</span><span class="o">/</span><span class="nx">haproxy</span><span class="p">.</span><span class="nx">orig</span>
+</pre></div>
+<p>Kemudian tambahkan baris berikut di bagian paling bawah dari config file di <em>/etc/haproxy/haproxy.cfg</em>.</p>
+<div class="highlight"><pre><span></span><span class="n">listen</span><span class="w"> </span><span class="n">stats</span>
+<span class="w">    </span><span class="n">bind</span><span class="w"> </span><span class="mf">192.168.30.73</span><span class="o">:</span><span class="mi">8080</span>
+<span class="w">    </span><span class="n">mode</span><span class="w"> </span><span class="n">http</span>
+<span class="w">    </span><span class="n">stats</span><span class="w"> </span><span class="n">enable</span>
+<span class="w">    </span><span class="n">stats</span><span class="w"> </span><span class="n">hide</span><span class="o">-</span><span class="n">version</span>
+<span class="w">    </span><span class="n">stats</span><span class="w"> </span><span class="n">realm</span><span class="w"> </span><span class="n">Haproxy</span><span class="err">\</span><span class="w"> </span><span class="n">Statistics</span>
+<span class="w">    </span><span class="n">stats</span><span class="w"> </span><span class="n">uri</span><span class="w"> </span><span class="o">/</span>
+<span class="w">    </span><span class="n">stats</span><span class="w"> </span><span class="n">auth</span><span class="w"> </span><span class="n">admin</span><span class="o">:</span><span class="n">p</span><span class="err">@</span><span class="mi">55</span><span class="n">w0rd123</span>
+
+<span class="n">listen</span><span class="w"> </span><span class="n">galera_cluster</span>
+<span class="w">    </span><span class="n">bind</span><span class="w"> </span><span class="mf">192.168.30.73</span><span class="o">:</span><span class="mi">3306</span>
+<span class="w">    </span><span class="n">balance</span><span class="w"> </span><span class="n">source</span>
+<span class="w">    </span><span class="n">mode</span><span class="w"> </span><span class="n">tcp</span>
+<span class="w">    </span><span class="n">option</span><span class="w"> </span><span class="n">tcpka</span>
+<span class="w">    </span><span class="n">option</span><span class="w"> </span><span class="n">mysql</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="n">haproxy</span>
+<span class="w">    </span><span class="n">option</span><span class="w"> </span><span class="n">tcplog</span>
+<span class="w">    </span><span class="n">server</span><span class="w"> </span><span class="n">db1</span><span class="w"> </span><span class="mf">192.168.30.70</span><span class="o">:</span><span class="mi">3306</span><span class="w">  </span><span class="n">check</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="n">server</span><span class="w"> </span><span class="n">db2</span><span class="w"> </span><span class="mf">192.168.30.71</span><span class="o">:</span><span class="mi">3306</span><span class="w">  </span><span class="n">check</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="n">server</span><span class="w"> </span><span class="n">db3</span><span class="w"> </span><span class="mf">192.168.30.72</span><span class="o">:</span><span class="mi">3306</span><span class="w">  </span><span class="n">check</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="mi">1</span>
+</pre></div>
+<p>Keterangan:
+<ul>
+<li>Listen stats = Setup statistic page dari Haproxy untuk monitoring matrics dari mysql cluster kita. </li>
+<li>bind = listen ip dan port yang digunakan untuk stats page dari haproxy. </li>
+<li>stats auth = Autentikasi untuk stats page, defaulnya tidak ada, jadi kita setup user dan passwordnya.</li>
+<li>stats enable = Menghidupkan module stats. </li>
+<li>Listen galera_cluster = Setting load balancer untuk galera cluster. </li>
+<li>balance = Type dari load balance yang akan digunakan, defaultnya adalah round-robin, disini kita menggunakan source atau Source IP Hash, yang berarti 
+setiap request yang datang dari IP yang sama akan diarahkan ke taget backend yang sama. </li>
+<li>mode = Setting untuk connect mode, disini kita menggunakan mode tcp, karena mariadb connect melalui tcp ke haproxy.</li>
+<li> server = List alamat ip dan hostname beserta port dari server backend. </li></ul></p>
+<p>Yang perlu di perhatikan paling utama adalah sesuaikan IP di bagian server dan bind dengan server yang kalian gunakan.
+Untuk opsi lainnya agar lebih jelas bisa di baca di <a href="https://linux.die.net/man/1/haproxy">man page</a> atau dokumentasi dari <a href="https://docs.haproxy.org/2.8/configuration.html">haproxy</a></p>
+<p><strong>Start Haproxy</strong></p>
+<p>Selanjutnya start haproxy dan allow user haproxy untuk mengakses galera cluster, karna saat ini haproxy belum bisa connect ke mysql menggunakan password, maka kita akan membuat user yang support login ke mysql secara passwordless</p>
+<div class="highlight"><pre><span></span><span class="n">$</span><span class="w"> </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">u</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">-</span><span class="n">p</span>
+
+<span class="n">MariaDB</span><span class="w"> </span><span class="p">[(</span><span class="n">none</span><span class="p">)]</span><span class="o">&gt;</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="n">haproxy</span><span class="err">@'</span><span class="mf">192.168.30.73</span><span class="err">'</span><span class="w"> </span><span class="n">WITH</span><span class="w"> </span><span class="n">MAX_QUERIES_PER_HOUR</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">MAX_UPDATES_PER_HOUR</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="n">MariaDB</span><span class="w"> </span><span class="p">[(</span><span class="n">none</span><span class="p">)]</span><span class="o">&gt;</span><span class="w"> </span><span class="err">\</span><span class="n">q</span>
+</pre></div>
+<p>Kemudian setting user untuk haproxy di <em>/etc/haproxy/haproxy.cfg</em> untuk config tersebut ada di bagian atasi di sub menu global config
+<img alt="user haproxy" src="images/haproxy-user.png"/></p>
+<p>Sesuaikan user tersebut dengan user yang di buat di mysql untuk mengakses database.</p>
+<p>Selanjutnya start haproxy</p>
+<div class="highlight"><pre><span></span><span class="nv">$</span><span class="w"> </span><span class="nv">sudo</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="n">haproxy</span>
+</pre></div>
+<p>Kemudian cek statistic page dari haproxy di browser dengan mengakses <code>http://ip_haproxy:port</code></p>
+<p>Jika semua sukses maka tampilan seperti ini akan muncul:
+<center><img alt="haproxy stat" height="450" src="images/haproxy_stat.png" width="450"/></center></p>
+<p>Jika halaman stat sudah muncul, berarti haproxy sudah sukses untuk terhubung dengan galera cluster, dan sudah dapat digunakan untuk load balance galera cluster.</p>
     <!-- <div class="aspect-w-16 aspect-h-9 mx-auto"></div> CSS placeholder -->
   </div>
   <footer class="flex flex-col mt-10 ">
@@ -285,10 +351,10 @@ Selanjutnya start Galera Cluster dari node pertama</p>
         </a>
       </div>
       <div class="w-1/2 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-r-lg ">
-        <a class="flex flex-col" href="/Bhyve the BSD Hypervisor.html">
+        <a class="flex flex-col" href="/nginx-rtmp-proxy.html">
           <div class="text-right mx-4 py-2">
             <p class="text-zinc-600 dark:text-zinc-300 text-sm">NEXT PAGE »</p>
-            <p class="text-right py-1 hover:underline">Berkenalan dengan Bhyve The BSD Hypervisor</p>
+            <p class="text-right py-1 hover:underline">Nginx RTMP Proxy</p>
           </div>
         </a>
       </div>
@@ -297,7 +363,7 @@ Selanjutnya start Galera Cluster dari node pertama</p>
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="twitter" aria-label="share Features on twitter"
-            href="https://twitter.com/intent/tweet/?text=Features&amp;url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            href="https://twitter.com/intent/tweet/?text=Features&amp;url=/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
             <i class="fab fa-twitter fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -305,7 +371,7 @@ Selanjutnya start Galera Cluster dari node pertama</p>
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="linkedin" aria-label="share Features on linkedin"
-            href="https://www.linkedin.com/sharing/share-offsite/?url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            href="https://www.linkedin.com/sharing/share-offsite/?url=/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
             <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -313,7 +379,7 @@ Selanjutnya start Galera Cluster dari node pertama</p>
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="reddit" aria-label="share Features on reddit"
-            href="https://reddit.com/submit?url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            href="https://reddit.com/submit?url=/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
             <i class="fab fa-reddit fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -321,7 +387,7 @@ Selanjutnya start Galera Cluster dari node pertama</p>
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="facebook" aria-label="share Features on facebook"
-            href="https://facebook.com/sharer/sharer.php?u=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            href="https://facebook.com/sharer/sharer.php?u=/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
             <i class="fab fa-facebook fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -329,7 +395,7 @@ Selanjutnya start Galera Cluster dari node pertama</p>
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="whatsapp" aria-label="share Features on whatsapp"
-            href="https://api.whatsapp.com/send?text=Features - /membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            href="https://api.whatsapp.com/send?text=Features - /install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
             <i class="fab fa-whatsapp fa-2x" aria-hidden="true"></i>
           </a>
         </li>
@@ -337,7 +403,7 @@ Selanjutnya start Galera Cluster dari node pertama</p>
       <ul>
         <li class="bg-gray-900 p-1 text-white rounded-md">
           <a target="_blank" rel="noopener noreferrer" title="telegram" aria-label="share Features on telegram"
-            href="https://telegram.me/share/url?text=Features&amp;url=/membangun-cluster-di-mariadb-menggunakan-galera-cluster-part-1.html">
+            href="https://telegram.me/share/url?text=Features&amp;url=/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html">
             <i class="fab fa-telegram fa-2x" aria-hidden="true"></i>
           </a>
         </li>

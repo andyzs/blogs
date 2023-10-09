@@ -1,39 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>blog-ydnaz - misc</title><link href="/" rel="alternate"></link><link href="/feeds/misc.atom.xml" rel="self"></link><id>/</id><updated>2020-06-30T22:30:00+07:00</updated><entry><title>Membangun Mariadb Cluster menggunakan Galera Cluster part 1</title><link href="/membangun-mariadb-cluster-menggunakan-galera-cluster-part-1.html" rel="alternate"></link><published>2020-06-30T22:30:00+07:00</published><updated>2020-06-30T22:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2020-06-30:/membangun-mariadb-cluster-menggunakan-galera-cluster-part-1.html</id><summary type="html">&lt;p&gt;Install dan konfigurasi Maridb Cluster&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;strong&gt;&lt;em&gt;Introduction:&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>blog-ydnaz - misc</title><link href="/" rel="alternate"></link><link href="/feeds/misc.atom.xml" rel="self"></link><id>/</id><updated>2020-06-30T22:30:00+07:00</updated><entry><title>Install dan Setup Mariadb Cluster menggunakan Galera Cluster</title><link href="/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html" rel="alternate"></link><published>2020-06-30T22:30:00+07:00</published><updated>2020-06-30T22:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2020-06-30:/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html</id><summary type="html">&lt;p&gt;Install dan konfigurasi Maridb Cluster&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;center&gt;&lt;img alt="mariadb galera" height="270" src="images/galera_cluster_logo.png" width="270"/&gt;&lt;/center&gt;
+&lt;strong&gt;&lt;em&gt;Introduction:&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Untuk membuat Clustering Database system di MariaDB maka bisa menggunakan Galera. 
 Galera sendiri sudah termasuk kedalam paket instalasi pada MariaDB sehingga tidak dibutuhkan instalasi paket tambahan.
 Namun jika ingin menggunakan versi galera yang lebih tinggi seperti galera-3 di MariaDB 10.3 dan 
 galera-4 di MariaDB 10.4 maka butuh menambahlak paket &lt;em&gt;galera-3&lt;/em&gt; dan &lt;em&gt;galera-4&lt;/em&gt; untuk menginstall 
-wsrep provider librarynya.&lt;/p&gt;
-&lt;p&gt;Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:&lt;/p&gt;
+wsrep provider librarynya.
+&lt;center&gt;&lt;img alt="db load-balance" height="300" src="images/db-loadbalance.png" width="300"/&gt;&lt;/center&gt;
+Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;True Multi-Master&lt;/em&gt;&lt;/strong&gt; 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;True Multi-Master&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
 You can read and write to any node at any time. 
-Changes to data on one node will be replicated on all. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Synchronous Replication&lt;/em&gt;&lt;/strong&gt; 
-There is no slave lag, so no data is lost if a node crashes.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Tightly Coupled&lt;/em&gt;&lt;/strong&gt; 
-All nodes hold the same state. There is no diverged data between nodes. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Multi-Threaded Slave&lt;/em&gt;&lt;/strong&gt; 
-This allows for better performance and for any workload. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;No Master-Slave Failover&lt;/em&gt;&lt;/strong&gt; 
-There is no need for master-slave operations or to use VIP. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Hot Standby&lt;/em&gt;&lt;/strong&gt; 
+Changes to data on one node will be replicated on all. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Synchronous Replication&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+There is no slave lag, so no data is lost if a node crashes.
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Tightly Coupled&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+All nodes hold the same state. There is no diverged data between nodes. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Multi-Threaded Slave&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+This allows for better performance and for any workload. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;No Master-Slave Failover&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+There is no need for master-slave operations or to use VIP. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Hot Standby&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
 There is no downtime related to failures or intentionally taking down a node 
-for maintenance, since there is no failover. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Automatic Node Provisioning&lt;/em&gt;&lt;/strong&gt; 
-There&amp;rsquo;s no need to backup manually the database and copy it to the new node. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Supports InnoDB&lt;/em&gt;&lt;/strong&gt; 
-The InnoDB storage engine provides for transactional tables. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;Transparent to Applications&lt;/em&gt;&lt;/strong&gt; 
+for maintenance, since there is no failover. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Automatic Node Provisioning&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+There&amp;rsquo;s no need to backup manually the database and copy it to the new node. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Supports InnoDB&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+The InnoDB storage engine provides for transactional tables. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;Transparent to Applications&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
 Generally, you won&amp;rsquo;t have to change an application that will interface with the database
- as a result of Galera. If you do, it will be minimal changes. &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;em&gt;No Read and Write Splitting Needed&lt;/em&gt;&lt;/strong&gt; 
-There is no need to split read and write queries.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Pada tutorial ini instalasi di lakukan di OS Ubuntu 20.04, tutorial ini harusnya bisa juga di implementasikan di Debian 10 dan turunannya.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Requirements:&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;3 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses &lt;code&gt;root&lt;/code&gt; atau &lt;code&gt;sudo&lt;/code&gt; sebagai instance database server.
+ as a result of Galera. If you do, it will be minimal changes. 
+&lt;li&gt; &lt;strong&gt;&lt;em&gt;No Read and Write Splitting Needed&lt;/em&gt;&lt;/strong&gt; &lt;/li&gt;
+There is no need to split read and write queries.
+&lt;/ul&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt;&lt;br/&gt;
+&lt;span style="background-color: #FF9333"&gt; &lt;strong&gt;&lt;em&gt;Tutorial instalasi ini di test di Ubuntu 20.04, 22.04 dan Debian 10, 11. Untuk distro lainnya atau varian lainnya silahkan di test sendiri (DWYOR).&lt;/em&gt;&lt;/strong&gt;&lt;/span&gt;&lt;br/&gt;
+:grin::grin:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Requirements:&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;
+3 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses &lt;code&gt;root&lt;/code&gt; atau &lt;code&gt;sudo&lt;/code&gt; sebagai instance database server.
 1 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses &lt;code&gt;root&lt;/code&gt; atau &lt;code&gt;sudo&lt;/code&gt; sebagai instance proxy server.
 (optional) server bisa saling terhubung menggunakan hostname&lt;/p&gt;
 &lt;p&gt;Server yang digunakan:&lt;/p&gt;
@@ -42,8 +46,8 @@ There is no need to split read and write queries.&lt;/li&gt;
 &lt;span class="x"&gt;192.168.30.64   db3&lt;/span&gt;
 &lt;span class="x"&gt;192.168.30.200  proxy&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Proses Instalasi:&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;Seperti biasa lakukan update terlebih dahulu sebelum menginstall paket.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Proses Instalasi:&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;
+Seperti biasa lakukan update terlebih dahulu sebelum menginstall paket.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;apt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;y&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;update&lt;/span&gt;
 &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;apt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;y&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;install&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;mariadb&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;server&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;rsync&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -68,7 +72,7 @@ Selanjutnya keluar dari mariadb dengan perintah &lt;/p&gt;
 &lt;p&gt;Setlah itu kita akan melakukan config Galera, sebelum itu matikan terlebih dahulu servicenya.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;systemctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;stop&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;mariadb&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Setup Galera cluster&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Setup Galera cluster&lt;/em&gt;&lt;/strong&gt; &lt;/p&gt;
 &lt;p&gt;Konfigurasi Galera cluster ada di &lt;code&gt;/etc/mysql/mariadb.conf.d/50-galera.cnf&lt;/code&gt;
 Edit file tersebut dan tambahkan config seperti berikut:
 &lt;code&gt;$ sudo vim /etc/mysql/mariadb.conf.d/50-galera.cnf&lt;/code&gt;&lt;/p&gt;
@@ -98,8 +102,8 @@ Edit file tersebut dan tambahkan config seperti berikut:
 &lt;span class="x"&gt;wsrep_node_name=&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;ganti dengan hostname dan ip dari masing-masing server. &lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Firwall Config (Optional)&lt;/em&gt;&lt;/strong&gt;
-Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, namun untuk production sangat disarankan agar service tersebut dinyalakan. Untuk management firewall di Debian Base bisa menggunakan UFW ataupun Firewalld seperti di keluarga &lt;strong&gt;RedHat&lt;/strong&gt;, namun agar lebih seragam maka tutorial ini akan menggunakan UFW sebagai manajemen firewallnya.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Firwall Config (Optional)&lt;/em&gt;&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, namun untuk production sangat disarankan agar service tersebut dinyalakan. Untuk management firewall di Debian Base bisa menggunakan UFW ataupun Firewalld seperti di keluarga &lt;strong&gt;RedHat&lt;/strong&gt;, namun agar lebih seragam maka tutorial ini akan menggunakan UFW sebagai manajemen firewallnya.&lt;/p&gt;
 &lt;p&gt;Port yang perlu di buka agar service-service yang dibutuhkan untuk Galera Cluster bisa berfungsi:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;3306&lt;/strong&gt; Port yang digunakan untuk MySQL/MariaDB Database berkomunikasi, merupakan default service port (meskipun port ini bisa diubah tetapi tidak direkomendasikan untuk mengubahnya).&lt;/li&gt;
@@ -115,20 +119,95 @@ Secara default biasanya Ubuntu dan Debian tidak mengaktifkan firewall service, n
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;ufw&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;allow&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3306&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4567&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4568&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4444&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;tcp&lt;/span&gt;
 &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;ufw&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;allow&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;4567&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;udp&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;Start Galera Cluster&lt;/em&gt;&lt;/strong&gt;
-Selanjutnya start Galera Cluster dari node pertama&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Start Galera Cluster&lt;/em&gt;&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;Selanjutnya start Galera Cluster dari node pertama&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;galera_new_cluster&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Selanjutnya cek status wsrep dengan login ke mysql shell&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;mysql&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;u&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;root&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;p&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"SHOW STATUS LIKE 'wsrep_cluster_size'"&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Jika sukses maka akan muncul tampilan berikut:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="wsrep status " src="images/wsrep-img1.png"/&gt; &lt;/p&gt;
 &lt;p&gt;Selanjutnya start service mariadb-server di node 2 dan 3&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;systemctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;start&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;mysql&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;dan cek kembali wsrep status nya, jika server db node 2 dan 3 juga sukses, maka ukuran &lt;strong&gt;wsrep_cluster_size&lt;/strong&gt; nya akan bertambah seperti gambar berikut:&lt;/p&gt;
-&lt;p&gt;Sampai disini dulu tutorial &lt;strong&gt;part 1&lt;/strong&gt; ini, untuk testing replication akan kita sambung di part berikutnya.&lt;br/&gt;
-😁 😁 😁&lt;/p&gt;</content><category term="misc"></category><category term="Mariadb"></category><category term="linux"></category><category term="database"></category><category term="cluster"></category></entry><entry><title>Apa itu Cluster?</title><link href="/apa-itu-cluster.html" rel="alternate"></link><published>2014-06-10T13:30:00+07:00</published><updated>2014-06-10T13:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2014-06-10:/apa-itu-cluster.html</id><summary type="html">&lt;p&gt;Mengenal apa itu Clustering system&lt;/p&gt;</summary><content type="html">&lt;p&gt;Apa itu Cluster?&lt;/p&gt;
+&lt;p&gt;dan cek kembali wsrep status nya, jika server db node 2 dan 3 juga sukses, maka ukuran &lt;strong&gt;wsrep_cluster_size&lt;/strong&gt; nya akan bertambah seperti gambar berikut:
+&lt;img alt="wsrep_status_node2 " src="images/wsrep-imgdb2.png"/&gt; &lt;img alt="wsrep_status_node3 " src="images/wsrep-img3.png"/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Setup Load Balance&lt;/em&gt;&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;Setelah selesai setup cluster selanjutnya kita akan setting &lt;em&gt;load balancing&lt;/em&gt; untuk galera cluster ini. Tujuan load balance adalah untuk memastikan bahwa load terbagi dengan rata
+antar semua server. Untuk load balance-nya kita bisa menggunakan haproxy, nginx maupun tools load balance lainnya.
+Disini kita akan menggunakan Haproxy sebagai load-balancer server. Untuk menginstall haproxy di ubuntu atau debian jalankan perinta berikut:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt; &lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;haproxy&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Selanjutnya setup haproxy, sebaiknya kita copy terlebih dahulu default confignya.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;cp&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;haproxy&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;haproxy&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;cfg&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;haproxy&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;haproxy&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;orig&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Kemudian tambahkan baris berikut di bagian paling bawah dari config file di &lt;em&gt;/etc/haproxy/haproxy.cfg&lt;/em&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;listen&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;bind&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;192.168.30.73&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;8080&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;mode&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;http&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;enable&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;hide&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;version&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;realm&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Haproxy&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Statistics&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;auth&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;admin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="mi"&gt;55&lt;/span&gt;&lt;span class="n"&gt;w0rd123&lt;/span&gt;
+
+&lt;span class="n"&gt;listen&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;galera_cluster&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;bind&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;192.168.30.73&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;3306&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;balance&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;mode&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tcp&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;option&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tcpka&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;option&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;check&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;haproxy&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;option&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tcplog&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;db1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;192.168.30.70&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;3306&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;check&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;weight&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;db2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;192.168.30.71&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;3306&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;check&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;weight&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;db3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;192.168.30.72&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;3306&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;check&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;weight&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Keterangan:
+&lt;ul&gt;
+&lt;li&gt;Listen stats = Setup statistic page dari Haproxy untuk monitoring matrics dari mysql cluster kita. &lt;/li&gt;
+&lt;li&gt;bind = listen ip dan port yang digunakan untuk stats page dari haproxy. &lt;/li&gt;
+&lt;li&gt;stats auth = Autentikasi untuk stats page, defaulnya tidak ada, jadi kita setup user dan passwordnya.&lt;/li&gt;
+&lt;li&gt;stats enable = Menghidupkan module stats. &lt;/li&gt;
+&lt;li&gt;Listen galera_cluster = Setting load balancer untuk galera cluster. &lt;/li&gt;
+&lt;li&gt;balance = Type dari load balance yang akan digunakan, defaultnya adalah round-robin, disini kita menggunakan source atau Source IP Hash, yang berarti 
+setiap request yang datang dari IP yang sama akan diarahkan ke taget backend yang sama. &lt;/li&gt;
+&lt;li&gt;mode = Setting untuk connect mode, disini kita menggunakan mode tcp, karena mariadb connect melalui tcp ke haproxy.&lt;/li&gt;
+&lt;li&gt; server = List alamat ip dan hostname beserta port dari server backend. &lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
+&lt;p&gt;Yang perlu di perhatikan paling utama adalah sesuaikan IP di bagian server dan bind dengan server yang kalian gunakan.
+Untuk opsi lainnya agar lebih jelas bisa di baca di &lt;a href="https://linux.die.net/man/1/haproxy"&gt;man page&lt;/a&gt; atau dokumentasi dari &lt;a href="https://docs.haproxy.org/2.8/configuration.html"&gt;haproxy&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Start Haproxy&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Selanjutnya start haproxy dan allow user haproxy untuk mengakses galera cluster, karna saat ini haproxy belum bisa connect ke mysql menggunakan password, maka kita akan membuat user yang support login ke mysql secara passwordless&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;
+
+&lt;span class="n"&gt;MariaDB&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;none&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;create&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;haproxy&lt;/span&gt;&lt;span class="err"&gt;@'&lt;/span&gt;&lt;span class="mf"&gt;192.168.30.73&lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;WITH&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MAX_QUERIES_PER_HOUR&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MAX_UPDATES_PER_HOUR&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="n"&gt;MariaDB&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;none&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Kemudian setting user untuk haproxy di &lt;em&gt;/etc/haproxy/haproxy.cfg&lt;/em&gt; untuk config tersebut ada di bagian atasi di sub menu global config
+&lt;img alt="user haproxy" src="images/haproxy-user.png"/&gt;&lt;/p&gt;
+&lt;p&gt;Sesuaikan user tersebut dengan user yang di buat di mysql untuk mengakses database.&lt;/p&gt;
+&lt;p&gt;Selanjutnya start haproxy&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;$&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;systemctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;haproxy&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Kemudian cek statistic page dari haproxy di browser dengan mengakses &lt;code&gt;http://ip_haproxy:port&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Jika semua sukses maka tampilan seperti ini akan muncul:
+&lt;center&gt;&lt;img alt="haproxy stat" height="450" src="images/haproxy_stat.png" width="450"/&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;Jika halaman stat sudah muncul, berarti haproxy sudah sukses untuk terhubung dengan galera cluster, dan sudah dapat digunakan untuk load balance galera cluster.&lt;/p&gt;</content><category term="misc"></category><category term="Mariadb"></category><category term="linux"></category><category term="database"></category><category term="cluster"></category></entry><entry><title>Nginx RTMP Proxy</title><link href="/nginx-rtmp-proxy.html" rel="alternate"></link><published>2020-05-04T20:30:00+07:00</published><updated>2020-05-04T20:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2020-05-04:/nginx-rtmp-proxy.html</id><summary type="html">&lt;p&gt;Nginx for RTMP Proxy&lt;/p&gt;</summary><content type="html">&lt;p&gt;The company i'm currently working for usually held anual event for our customer. And with the hit of coronavirus that keep spreading, we're all force to do all of our things remotely from home.
+And we also decided to change the strategy of our anual meeting for our customer with online conference. 
+And for the streaming software we'll use the AntMedia Server as the straming backend that sits behind our network, and we want to use some proxy-ing tools for internet facing . 
+Initially we want to go with  apache or haproxy to be the proxy tools, but after some search and read this blog post &lt;a href="https://www.nginx.com/blog/tcp-load-balancing-udp-load-balancing-nginx-tips-tricks/"&gt;tcp and udp load balancing with nginx&lt;/a&gt; and &lt;a href="https://nginx-rtmp.blogspot.com/"&gt;nginx rtmp&lt;/a&gt;&lt;br/&gt;
+, we decide to try nginx.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Nginx TCP (Stream Module)&lt;/strong&gt;&lt;br/&gt;
+The configuration initially looks very straigh forward, but the module didn't including in nginx build by default. It's must be build manually with option &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;with&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;stream&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;when you configure nginx.&lt;/p&gt;
+&lt;p&gt;With that module you can use nginx as TCP Proxy, and nginx now can be use as the proxy for any TCP and UDP.&lt;/p&gt;
+&lt;p&gt;And later on we also found that in nginx plus, they build some module that not only make use of nginx as TCP proxy, buat also specifically as the RTMP proxy. And for the opensource version we can use this module
+&lt;a href="https://github.com/arut/nginx-rtmp-module.git"&gt;nginx-ts-module&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;If you use Debian based and wan't to use pre-compiled module you can use the library&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;libnginx&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rtmp&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="misc"></category><category term="nginx"></category><category term="linux"></category><category term="proxy"></category><category term="tcp"></category><category term="rtmp"></category></entry><entry><title>Apa itu Cluster?</title><link href="/apa-itu-cluster.html" rel="alternate"></link><published>2014-06-10T13:30:00+07:00</published><updated>2014-06-10T13:30:00+07:00</updated><author><name>me</name></author><id>tag:None,2014-06-10:/apa-itu-cluster.html</id><summary type="html">&lt;p&gt;Mengenal apa itu Clustering system&lt;/p&gt;</summary><content type="html">&lt;p&gt;Apa itu Cluster?&lt;/p&gt;
 &lt;p&gt;&lt;img alt="cluster img!" src="images/cluster-img2.png" title="cluster2.img"/&gt;&lt;/p&gt;
 &lt;p&gt;Teknik Clustering di dalam system komputer adalah teknik menggabungkan beberapa server atau instance menjadi sebuah resource system yang bisa digunakan untuk berbagai keperluan.
 Clustering pada system komputer sendiri bisa merupakan Hardware Cluster maupun Software Cluster.&lt;/p&gt;

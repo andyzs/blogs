@@ -13,9 +13,14 @@ url = "/Volume Storage management di Windows.html"
 title = "Microsoft Storage Space"
 
 [[input.files]]
-path = "membangun-mariadb-cluster-menggunakan-galera-cluster-part-1.html"
-url = "/membangun-mariadb-cluster-menggunakan-galera-cluster-part-1.html"
-title = "Membangun Mariadb Cluster menggunakan Galera Cluster part 1"
+path = "install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html"
+url = "/install-dan-setup-mariadb-cluster-menggunakan-galera-cluster.html"
+title = "Install dan Setup Mariadb Cluster menggunakan Galera Cluster"
+
+[[input.files]]
+path = "nginx-rtmp-proxy.html"
+url = "/nginx-rtmp-proxy.html"
+title = "Nginx RTMP Proxy"
 
 [[input.files]]
 path = "Bhyve the BSD Hypervisor.html"
