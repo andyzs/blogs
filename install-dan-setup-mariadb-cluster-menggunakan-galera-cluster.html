@@ -160,8 +160,7 @@ Generally, you won&rsquo;t have to change an application that will interface wit
 There is no need to split read and write queries.
 </ul></p>
 <p><strong>Disclaimer:</strong><br/>
-<span style="background-color: #FF9333"> <strong><em>Tutorial instalasi ini di test di Ubuntu 20.04, 22.04 dan Debian 10, 11. Untuk distro lainnya atau varian lainnya silahkan di test sendiri (DWYOR).</em></strong></span><br/>
-:grin::grin:</p>
+<span style="background-color: #FF9333"> <strong><em>Tutorial instalasi ini di test di Ubuntu 20.04, 22.04 dan Debian 10, 11. Untuk distro lainnya atau varian lainnya silahkan di test sendiri (DWYOR).</em></strong></span> </p>
 <p><strong><em>Requirements:</em></strong><br/>
 3 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance database server.
 1 server dengan OS Linux varian Ubuntu 20.04 atau Debian 10 fresh install dengan akses <code>root</code> atau <code>sudo</code> sebagai instance proxy server.
@@ -319,7 +318,9 @@ Untuk opsi lainnya agar lebih jelas bisa di baca di <a href="https://linux.die.n
 <p>Kemudian cek statistic page dari haproxy di browser dengan mengakses <code>http://ip_haproxy:port</code></p>
 <p>Jika semua sukses maka tampilan seperti ini akan muncul:
 <center><img alt="haproxy stat" height="450" src="images/haproxy_stat.png" width="450"/></center></p>
-<p>Jika halaman stat sudah muncul, berarti haproxy sudah sukses untuk terhubung dengan galera cluster, dan sudah dapat digunakan untuk load balance galera cluster.</p>
+<p>Jika halaman stat sudah muncul, berarti haproxy sudah sukses untuk terhubung dengan galera cluster, dan sudah dapat digunakan untuk load balance galera cluster.
+Selanjutnya untuk menggunakan cluster ini maka kita akan mengakses melalui haproxy ini.</p>
+<p>Sampai disini dulu tutorial nya.</p>
     <!-- <div class="aspect-w-16 aspect-h-9 mx-auto"></div> CSS placeholder -->
   </div>
   <footer class="flex flex-col mt-10 ">
