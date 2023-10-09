@@ -132,9 +132,8 @@
 Galera sendiri sudah termasuk kedalam paket instalasi pada MariaDB sehingga tidak dibutuhkan instalasi paket tambahan.
 Namun jika ingin menggunakan versi galera yang lebih tinggi seperti galera-3 di MariaDB 10.3 dan 
 galera-4 di MariaDB 10.4 maka butuh menambahlak paket <em>galera-3</em> dan <em>galera-4</em> untuk menginstall 
-wsrep provider librarynya.
-<center><img alt="db load-balance" height="300" src="images/db-loadbalance.png" width="300"/></center>
-Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:
+wsrep provider librarynya.</p>
+<p>Beberapa Fitur yang ditawarkan dari Galera Cluster diantaranya:
 <ul>
 <li> <strong><em>True Multi-Master</em></strong> </li>
 You can read and write to any node at any time. 
@@ -261,6 +260,7 @@ Edit file tersebut dan tambahkan config seperti berikut:
 <p>dan cek kembali wsrep status nya, jika server db node 2 dan 3 juga sukses, maka ukuran <strong>wsrep_cluster_size</strong> nya akan bertambah seperti gambar berikut:
 <img alt="wsrep_status_node2 " src="images/wsrep-imgdb2.png"/> <img alt="wsrep_status_node3 " src="images/wsrep-img3.png"/></p>
 <p><strong><em>Setup Load Balance</em></strong> </p>
+<p><center><img alt="db load-balance" height="300" src="images/db-loadbalance.png" width="300"/></center></p>
 <p>Setelah selesai setup cluster selanjutnya kita akan setting <em>load balancing</em> untuk galera cluster ini. Tujuan load balance adalah untuk memastikan bahwa load terbagi dengan rata
 antar semua server. Untuk load balance-nya kita bisa menggunakan haproxy, nginx maupun tools load balance lainnya.
 Disini kita akan menggunakan Haproxy sebagai load-balancer server. Untuk menginstall haproxy di ubuntu atau debian jalankan perinta berikut:</p>
